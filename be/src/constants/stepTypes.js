@@ -1,0 +1,30 @@
+export const STEP_TYPES = Object.freeze(["goto", "act", "observe", "extract"]);
+
+export const STEP_ALIASES = Object.freeze({
+  navigate: "goto",
+  open: "goto",
+  visit: "goto",
+  go: "goto",
+  go_to: "goto",
+  open_page: "goto",
+  load: "goto",
+  click: "act",
+  type: "act",
+  fill: "act",
+  input: "act",
+  select: "act",
+  press: "act",
+  scroll: "act",
+  hover: "act",
+  tap: "act",
+  interact: "act",
+  find: "observe",
+  exists: "observe",
+  locate: "observe",
+  read: "extract",
+  get: "extract",
+  scrape: "extract",
+  retrieve: "extract",
+  capture: "extract",
+});
+

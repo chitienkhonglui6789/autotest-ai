@@ -1,0 +1,22 @@
+version: "2.2"
+
+services:
+  autotest-studio:
+    image: autotest-studio:latest
+    container_name: autotest-studio
+    restart: unless-stopped
+    ports:
+      - "${EXTERNAL_PORT:-39793}:3000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - HEADLESS=true
+      - CHROME_PATH=/usr/bin/chromium
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/be/data
+      - ./screenshots:/app/be/screenshots
+      - ./.env:/app/be/.env
+    # shm_size 1GB giup Chromium headless render muot ma khong bi crash bo nho dem
+    shm_size: "1gb"

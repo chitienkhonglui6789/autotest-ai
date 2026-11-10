@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>HƯỚNG DẪN TRIỂN KHAI VÀ VẬN HÀNH AUTOTEST STUDIO OFFLINE</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 14mm 16mm 14mm;
+    @bottom-right {
+      content: "Trang " counter(page);
+      font-size: 9pt;
+      color: #64748b;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    line-height: 1.55;
+    font-size: 10pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3, h4 {
+    color: #0f172a;
+    font-weight: 700;
+    page-break-after: avoid;
+  }
+
+  h1 {
+    font-size: 20pt;
+    margin-top: 0;
+    margin-bottom: 6px;
+    color: #1e3a8a;
+    border-bottom: 3px solid #2563eb;
+    padding-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .doc-subtitle {
+    font-size: 11pt;
+    color: #475569;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .meta-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9pt;
+  }
+  .meta-item {
+    margin: 2px 0;
+  }
+  .meta-item strong {
+    color: #334155;
+  }
+
+  h2 {
+    font-size: 13.5pt;
+    margin-top: 22px;
+    margin-bottom: 10px;
+    border-bottom: 1.5px solid #cbd5e1;
+    padding-bottom: 4px;
+    color: #1e40af;
+  }
+
+  h3 {
+    font-size: 11pt;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    color: #0369a1;
+  }
+
+  p {
+    margin: 0 0 8px 0;
+    text-align: justify;
+  }
+
+  ul, ol {
+    margin: 0 0 10px 0;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  code {
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 9pt;
+    background-color: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+  }
+
+  pre {
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 8.8pt;
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 10px 14px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 8px 0 12px 0;
+    line-height: 1.45;
+    page-break-inside: avoid;
+  }
+
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    border: none;
+    font-size: inherit;
+  }
+
+  .highlight-code {
+    color: #38bdf8;
+  }
+  .comment-code {
+    color: #94a3b8;
+    font-style: italic;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 14px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  .callout {
+    border-left: 4px solid;
+    padding: 9px 13px;
+    margin: 10px 0 14px 0;
+    border-radius: 0 6px 6px 0;
+    page-break-inside: avoid;
+    font-size: 9.3pt;
+  }
+  .callout-info {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+    color: #1e40af;
+  }
+  .callout-warning {
+    border-color: #d97706;
+    background-color: #fffbeb;
+    color: #92400e;
+  }
+  .callout-success {
+    border-color: #16a34a;
+    background-color: #f0fdf4;
+    color: #166534;
+  }
+  .callout strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    font-size: 8pt;
+    font-weight: 600;
+    border-radius: 10px;
+    text-transform: uppercase;
+  }
+  .badge-blue { background-color: #dbeafe; color: #1e40af; }
+  .badge-green { background-color: #dcfce7; color: #166534; }
+  .badge-amber { background-color: #fef3c7; color: #92400e; }
+</style>
+</head>
+<body>
+
+  <h1>AUTOTEST STUDIO ENTERPRISE</h1>
+  <div class="doc-subtitle">Tài liệu Kỹ thuật: Hướng dẫn Triển khai & Vận hành Môi trường Mạng LAN Nội bộ (Offline 100%)</div>
+
+  <div class="meta-box">
+    <div>
+      <div class="meta-item"><strong>Phiên bản tài liệu:</strong> 2.0 (Bản cập nhật Kiến trúc Đồng bộ LLM)</div>
+      <div class="meta-item"><strong>Môi trường mục tiêu:</strong> Linux Server (Ubuntu, Debian, RHEL, CentOS)</div>
+      <div class="meta-item"><strong>Cổng dịch vụ mặc định:</strong> <code>39793</code> (Đã ánh xạ từ container 3000)</div>
+    </div>
+    <div>
+      <div class="meta-item"><strong>Khả năng mạng:</strong> Không cần kết nối Internet (Isolated LAN)</div>
+      <div class="meta-item"><strong>Docker Compose:</strong> Tương thích v2.2 (hỗ trợ legacy 1.17.1 & Compose v2)</div>
+      <div class="meta-item"><strong>Mô hình AI:</strong> LiteLLM / vLLM / Ollama (Qwen, LLaMA, DeepSeek...)</div>
+    </div>
+  </div>
+
+  <h2>1. TỔNG QUAN KIẾN TRÚC HỆ THỐNG</h2>
+  <p>
+    <strong>AutoTest Studio</strong> là nền tảng tự động hóa kiểm thử web thế hệ mới, tích hợp trí tuệ nhân tạo (AI Engine) và trình duyệt Chromium Headless để diễn giải kịch bản kiểm thử bằng ngôn ngữ tự nhiên thành các chuỗi hành động click, nhập liệu và kiểm tra trên giao diện web.
+  </p>
+
+  <div class="callout callout-info">
+    <strong>Kiến trúc hợp nhất AI Client nội bộ (Single Unified LLM Bridge)</strong>
+    Trong phiên bản này, toàn bộ quá trình xử lý AI được hợp nhất qua một cổng kết nối duy nhất (<code>LLM_BASE_URL</code>). Thư viện Stagehand không còn tự động gọi ra cloud mà chuyển tiếp toàn bộ request qua hàm <code>ClientLLM</code> nội bộ, chấm dứt hoàn toàn nguy cơ đứt gãy mạng <code>failed to fetch</code> khi chạy offline.
+  </div>
+
+  <p>Hệ thống bao gồm 3 phân lớp chính gói gọn trong 1 Docker Image duy nhất:</p>
+  <ul>
+    <li><strong>Giao diện Web (Frontend):</strong> Ứng dụng React + Vite được biên dịch tĩnh, nhúng trực tiếp vào Backend Express phục vụ qua cổng <code>3000</code> (ánh xạ ra cổng ngoài <code>39793</code>).</li>
+    <li><strong>Máy chủ điều khiển (Backend Node.js 22):</strong> Tiếp nhận yêu cầu, phân loại kịch bản (Planner) và điều khiển trình duyệt qua Playwright CDP.</li>
+    <li><strong>Bộ não AI Trình duyệt (Stagehand Browser Automation):</strong> Định vị phần tử DOM theo ngữ nghĩa, thực hiện click, điền dữ liệu (Fill/Type), trích xuất và chụp ảnh toàn bộ tiến trình tương tác (Visual Timeline).</li>
+  </ul>
+
+  <h2>2. THÀNH PHẦN GÓI CÀI ĐẶT (autotest-offline.tar.gz)</h2>
+  <p>Gói cài đặt <code>autotest-offline.tar.gz</code> (dung lượng ~348 MB) chứa toàn bộ những gì cần thiết để vận hành hệ thống độc lập:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 28%;">Tệp tin / Thư mục</th>
+        <th style="width: 18%;">Định dạng</th>
+        <th>Mô tả chi tiết</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>autotest-studio-offline.tar</code></td>
+        <td><span class="badge badge-blue">Docker Image</span></td>
+        <td>Image Linux (Node.js 22 + Chromium + Font Unicode + Backend & Frontend).</td>
+      </tr>
+      <tr>
+        <td><code>docker-compose.yml</code></td>
+        <td><span class="badge badge-green">Cấu hình</span></td>
+        <td>Tương thích chuẩn Compose 2.2 (chạy tốt trên <code>docker-compose 1.17.1</code>).</td>
+      </tr>
+      <tr>
+        <td><code>deploy.sh</code></td>
+        <td><span class="badge badge-amber">Bash Script</span></td>
+        <td>Script tự động hóa 5 bước: tạo thư mục, nạp image tar, kiểm tra cổng 39793, và khởi chạy.</td>
+      </tr>
+      <tr>
+        <td><code>.env</code> & <code>.env.example</code></td>
+        <td><span class="badge badge-green">Biến môi trường</span></td>
+        <td>Chứa cổng 39793, địa chỉ IP máy chủ LLM nội bộ, tên model AI và khóa API.</td>
+      </tr>
+      <tr>
+        <td><code>data/</code> & <code>screenshots/</code></td>
+        <td>Thư mục dữ liệu</td>
+        <td>Lưu trữ dữ liệu lịch sử chạy test và ảnh chụp màn hình từng bước tương tác.</td>
+      </tr>
+      <tr>
+        <td><code>README.md</code></td>
+        <td>Tài liệu</td>
+        <td>Bản tóm tắt hướng dẫn thao tác nhanh trên terminal Linux.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <h2>3. QUY TRÌNH TRIỂN KHAI TỪNG BƯỚC TRÊN LINUX SERVER</h2>
+
+  <h3>Bước 1: Sao chép gói cài đặt sang máy chủ</h3>
+  <p>Dùng lệnh <code>scp</code> từ máy tính cá nhân để đẩy tệp nén sang máy chủ Linux thông qua giao thức SSH:</p>
+  <pre><code><span class="comment-code"># Cú pháp sao chép file sang server:</span>
+scp autotest-offline.tar.gz user@&lt;IP-SERVER&gt;:/home/user/</code></pre>
+
+  <h3>Bước 2: Đăng nhập SSH và giải nén</h3>
+  <pre><code>ssh user@&lt;IP-SERVER&gt;
+<span class="comment-code"># Giải nén gói triển khai</span>
+tar -xzf autotest-offline.tar.gz
+cd offline-package</code></pre>
+
+  <h3>Bước 3: Cấu hình thông số môi trường (.env)</h3>
+  <p>Mở tệp <code>.env</code> để tùy chỉnh kết nối tới model AI trong mạng LAN của bạn:</p>
+  <pre><code>nano .env</code></pre>
+
+  <p>Cấu hình mẫu chuẩn xác cho mô hình mạng nội bộ dùng model Qwen / LiteLLM / vLLM:</p>
+  <pre><code><span class="comment-code"># ========================================================
+# AutoTest Studio - Cấu hình mô hình AI & Triển khai
+# ========================================================</span>
+
+<span class="comment-code"># Khóa API của LLM (nếu server local yêu cầu token/virtual key thì điền vào, nếu không cần thì để trống)</span>
+<span class="highlight-code">LLM_API_KEY</span>=***
+
+<span class="comment-code"># Địa chỉ endpoint LLM nội bộ hỗ trợ chuẩn OpenAI-compatible (/chat/completions)</span>
+<span class="highlight-code">LLM_BASE_URL</span>=http://192.168.205.151:5000/api
+
+<span class="comment-code"># Tên Model AI dùng chung cho toàn bộ hệ thống (phân rã kịch bản + click/type tự động)</span>
+<span class="highlight-code">LLM_MODEL</span>=qwen3.8-27b
+
+<span class="comment-code"># Timeout khi gọi LLM (milliseconds)</span>
+LLM_TIMEOUT_MS=60000
+
+<span class="comment-code"># Cấu hình Cổng truy cập ngoài (Khách hàng mở trên trình duyệt)</span>
+<span class="highlight-code">EXTERNAL_PORT</span>=39793
+PORT=3000
+HOST=0.0.0.0
+HEADLESS=true</code></pre>
+
+  <h3>Bước 4: Chạy script triển khai tự động</h3>
+  <p>Chạy script <code>deploy.sh</code> với quyền quản trị:</p>
+  <pre><code>sudo bash deploy.sh</code></pre>
+
+  <div class="callout callout-success">
+    <strong>Script deploy.sh sẽ tự động thực hiện hoàn toàn:</strong>
+    1. Kiểm tra engine Docker Daemon trên máy chủ.<br>
+    2. Cấp quyền <code>chmod -R 777</code> cho thư mục <code>data</code> và <code>screenshots</code>.<br>
+    3. Kiểm tra cổng ngoài <code>39793</code> có bị ứng dụng khác chiếm dụng không.<br>
+    4. Nạp image <code>autotest-studio-offline.tar</code> vào Docker.<br>
+    5. Khởi chạy container bằng <code>docker-compose</code> (chuẩn Compose 2.2 tương thích bản 1.17.1) hoặc tự động dùng lệnh <code>docker run</code> dự phòng.
+  </div>
+
+  <h3>Bước 5: Truy cập hệ thống</h3>
+  <p>Mở trình duyệt web từ bất kỳ máy tính nào trong mạng LAN và truy cập:</p>
+  <pre><code><span class="highlight-code">http://&lt;IP-CỦA-SERVER-LINUX&gt;:39793</span></code></pre>
+
+  <div class="page-break"></div>
+
+  <h2>4. CƠ CHẾ KẾT NỐI AI & BỘ LỌC SUY LUẬN &lt;think&gt;</h2>
+
+  <h3>Sự khác biệt giữa Giai đoạn 1 (Planner) và Giai đoạn 2 (Stagehand)</h3>
+  <p>Hệ thống xử lý kịch bản kiểm thử qua 2 giai đoạn độc lập nhưng dùng chung 1 nguồn AI duy nhất:</p>
+  <ul>
+    <li><strong>Giai đoạn 1 (Planner - Phân rã kịch bản):</strong> Gửi câu lệnh bằng tiếng Việt/Anh tới <code>LLM_BASE_URL</code> để phân tích thành danh sách các bước có cấu trúc (ví dụ: 1. <code>goto</code>, 2. <code>act</code>, 3. <code>observe</code>).</li>
+    <li><strong>Giai đoạn 2 (Executor - Tương tác thực tế trên Web):</strong>
+      <ul>
+        <li>Bước <code>goto</code>: Dùng lệnh Chromium thuần để mở URL (không gọi AI).</li>
+        <li>Bước <code>act</code> (Ví dụ: <em>"enter username admin"</em>) hoặc <code>observe</code>: Stagehand trích xuất cây cấu trúc DOM của trang web, gửi về cho model <code>LLM_MODEL</code> qua giao tiếp <code>ClientLLM</code> nội bộ để xác định chính xác ô nhập/nút bấm và thực hiện hành động.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>Tại sao cần bộ lọc thẻ &lt;think&gt; cho model Qwen & DeepSeek?</h3>
+  <p>
+    Các dòng mô hình mã nguồn mở hiện đại (Qwen 2.5/3.8, DeepSeek-R1) khi nhận dữ liệu thường tiến hành "suy nghĩ nội tâm" trước khi trả kết quả, kẹp trong cặp thẻ <code>&lt;think&gt; ... &lt;/think&gt;</code>.
+  </p>
+  <p>
+    Thư viện Stagehand kiểm tra dữ liệu bằng bộ luật Zod Schema nghiêm ngặt. Nếu trong chuỗi phản hồi còn dính các ký tự chữ suy nghĩ hoặc thẻ <code>&lt;think&gt;</code>, lệnh đọc JSON sẽ bị lỗi cú pháp dẫn đến <code>ZodError</code> hoặc <code>EXECUTION_ERROR</code>.
+  </p>
+  <div class="callout callout-info">
+    <strong>Giải pháp đã tích hợp sẵn:</strong> Hàm <code>callUnifiedLLM</code> trong backend tự động áp dụng biểu thức chính quy (Regex) cắt bỏ toàn bộ khối <code>&lt;think&gt;...&lt;/think&gt;</code>, đồng thời tự động chuẩn hóa cấu trúc mảng <code>elements: []</code> để Stagehand luôn nhận được dữ liệu chuẩn xác 100%.
+  </div>
+
+  <h2>5. BẢNG CÁC LỆNH QUẢN TRỊ VẬN HÀNH THƯỜNG DÙNG</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 35%;">Tác vụ quản trị</th>
+        <th>Câu lệnh thực thi trên Linux Server</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Xem log hoạt động thời gian thực</strong></td>
+        <td><code>docker logs -f autotest-studio</code></td>
+      </tr>
+      <tr>
+        <td><strong>Xem 100 dòng log gần nhất</strong></td>
+        <td><code>docker logs --tail 100 autotest-studio</code></td>
+      </tr>
+      <tr>
+        <td><strong>Kiểm tra trạng thái Container</strong></td>
+        <td><code>docker ps --filter "name=autotest-studio"</code></td>
+      </tr>
+      <tr>
+        <td><strong>Khởi động lại dịch vụ</strong></td>
+        <td><code>docker restart autotest-studio</code> (hoặc <code>docker-compose restart</code>)</td>
+      </tr>
+      <tr>
+        <td><strong>Dừng dịch vụ</strong></td>
+        <td><code>docker-compose down</code> (hoặc <code>docker stop autotest-studio</code>)</td>
+      </tr>
+      <tr>
+        <td><strong>Thay đổi cấu hình .env</strong></td>
+        <td>Chỉnh sửa <code>nano .env</code> rồi chạy <code>docker restart autotest-studio</code> (Có thể sửa trực tiếp trên giao diện Web mà không cần SSH).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>6. XỬ LÝ SỰ CỐ THƯỜNG GẶP (TROUBLESHOOTING)</h2>
+
+  <h3>1. Lỗi: "Model trả mã HTTP 401: LiteLLM Virtual Key expected"</h3>
+  <p><strong>Nguyên nhân:</strong> Server LiteLLM của bạn đang bật chế độ bảo mật yêu cầu Virtual Key (bắt đầu bằng <code>sk-...</code>) nhưng trong file <code>.env</code> bạn lại điền key của Groq (bắt đầu bằng <code>gsk_...</code>).</p>
+  <p><strong>Khắc phục:</strong> Mở <code>.env</code>, sửa biến <code>LLM_API_KEY=***</code> bằng Virtual Key được cấp trên LiteLLM dashboard của bạn.</p>
+
+  <h3>2. Lỗi: "Cổng 39793 đang bị chiếm dụng"</h3>
+  <p><strong>Khắc phục:</strong> Mở file <code>.env</code>, đổi dòng <code>EXTERNAL_PORT=39793</code> thành cổng khác (ví dụ: <code>39794</code>) rồi chạy lại <code>sudo bash deploy.sh</code>.</p>
+
+  <h3>3. Lỗi: "Unsupported Compose file version" trên docker-compose 1.17.1</h3>
+  <p><strong>Khắc phục:</strong> File <code>docker-compose.yml</code> đi kèm trong gói này đã được khóa ở chuẩn <code>version: "2.2"</code>. Nếu bạn tự tạo file compose mới, tuyệt đối không dùng <code>version: "3.8"</code> mà phải giữ <code>version: "2.2"</code>.</p>
+
+  <hr style="border: none; border-top: 1px solid #cbd5e1; margin-top: 25px; margin-bottom: 15px;" />
+  <div style="text-align: center; font-size: 8.5pt; color: #64748b;">
+    AutoTest Studio Enterprise Edition • Bản quyền tài liệu lưu hành nội bộ • Triển khai mạng LAN Offline
+  </div>
+
+</body>
+</html>

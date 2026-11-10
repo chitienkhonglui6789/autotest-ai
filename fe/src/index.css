@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/* ── Custom Scrollbar (mỏng, tối giản, chuẩn SaaS) ──────────── */
+* { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ── Spinner Animation ───────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+}
+
+/* ── Drag & Drop ─────────────────────────────────────────────── */
+.drag-handle { cursor: grab; touch-action: none; }
+.drag-handle:active { cursor: grabbing; }
+
+/* ── Drop Zone ───────────────────────────────────────────────── */
+.drop-idle {
+  border: 2px dashed #334155; border-radius: 12px;
+  background: #090d16; transition: all .2s; cursor: pointer;
+}
+.drop-active {
+  border: 2px dashed #6366f1; border-radius: 12px;
+  background: rgba(99,102,241,.06); cursor: pointer;
+}
+
+/* ── Smooth Run Glow Pulse ───────────────────────────────────── */
+@keyframes subtle-glow {
+  0%, 100% { box-shadow: 0 4px 18px 0 rgba(99,102,241,.3); }
+  50%      { box-shadow: 0 4px 28px 4px rgba(139,92,246,.5); }
+}
+.btn-subtle-glow { animation: subtle-glow 2.8s ease-in-out infinite; }
+
+/* ── Checkbox ────────────────────────────────────────────────── */
+input[type="checkbox"] { accent-color: #6366f1; }
+
+/* ── Smooth tab content animation ────────────────────────────── */
+.tab-content {
+  animation: fadeIn .2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}

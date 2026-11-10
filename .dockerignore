@@ -1,0 +1,16 @@
+**/node_modules
+**/.git
+**/.github
+**/.vscode
+**/.idea
+be/screenshots/*
+!be/screenshots/.gitkeep
+be/test-screenshots/*
+!be/test-screenshots/.gitkeep
+be/data/*
+!be/data/.gitkeep
+fe/dist
+*.tar
+*.zip
+offline-package
+
