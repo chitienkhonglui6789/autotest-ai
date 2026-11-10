@@ -57,6 +57,7 @@ export function cleanElement(raw, auditLog = []) {
   const origMethod = String(raw.method || raw.action || "click").trim();
   let method = origMethod.toLowerCase();
   const methodMap = {
+    fill: "fill",
     input: "fill",
     type: "type",
     write: "fill",

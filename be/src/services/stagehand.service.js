@@ -247,15 +247,26 @@ export class StagehandService {
         return;
       }
 
-      const pages = await browser.context.pages();
-      const page = pages.length > 0 ? pages[0] : await browser.context.newPage();
-      if (!page) {
+      let targetPage = pages.length > 0 ? pages[0] : await browser.context.newPage();
+      if (!targetPage) {
         throw new Error("Không thể khởi tạo trang web");
       }
 
+      // Theo dõi sự kiện popup/tab mới để không bị mất dấu ngữ cảnh
+      const onNewPage = (newPage) => {
+        logger.info(`Phát hiện mở tab/popup mới [${newPage.pageId}]. Chuyển ngữ cảnh tương tác sang tab mới.`);
+        targetPage = newPage;
+        newPage.on?.("close", async () => {
+          logger.info(`Tab/popup [${newPage.pageId}] đã đóng. Khôi phục ngữ cảnh về tab gốc.`);
+          const remainingPages = await browser.context.pages().catch(() => []);
+          targetPage = remainingPages.length > 0 ? remainingPages[remainingPages.length - 1] : targetPage;
+        });
+      };
+      browser.context.on?.("page", onNewPage);
+
       // Cấu hình viewport cố định 1280x800 và deviceScaleFactor: 2 cho ảnh rõ nét
       try {
-        await page.setViewportSize(1280, 800, { deviceScaleFactor: 2 });
+        await targetPage.setViewportSize(1280, 800, { deviceScaleFactor: 2 });
         logger.info("Đã cấu hình viewport 1280x800 và deviceScaleFactor: 2");
       } catch (vpErr) {
         logger.warn("Không thể thiết lập viewport 1280x800 @ 2x:", vpErr.message);
@@ -264,7 +275,7 @@ export class StagehandService {
       // Đảm bảo môi trường kiểm thử cách ly (Clean Session / Incognito Isolation)
       try {
         await browser.context.clearCookies();
-        await page.evaluate(() => {
+        await targetPage.evaluate(() => {
           try { localStorage.clear(); } catch(e){}
           try { sessionStorage.clear(); } catch(e){}
         });
@@ -300,7 +311,7 @@ export class StagehandService {
           try {
             const filename = `step-${i + 1}-${suffix}.png`;
             const filePath = path.join(runScreenshotsDir, filename);
-            await page.screenshot({ path: filePath, type: "png" });
+            await targetPage.screenshot({ path: filePath, type: "png" });
             const url = `/screenshots/${runId}/${filename}`;
             const shot = {
               type: suffix,
@@ -322,11 +333,11 @@ export class StagehandService {
         try {
           if (s.type === "goto") {
             const url = toUrl(s.text);
-            await page.goto(url, {
+            await targetPage.goto(url, {
               waitUntil: "domcontentloaded",
               timeout: this.config.timeouts.gotoMs,
             });
-            await page.waitForTimeout(500);
+            await targetPage.waitForTimeout(500);
             step.status = "passed";
             step.message = `đã mở ${url}`;
             await takeShot("view", {
@@ -336,15 +347,15 @@ export class StagehandService {
 
           } else if (s.type === "act") {
             // Khoảnh khắc 1: TRƯỚC KHI HÀNH ĐỘNG
-            // Tìm và highlight phần tử mục tiêu
+            // Tìm và highlight phần tử mục tiêu (luôn ghim targetPage)
             let targetSelector = null;
             try {
-              const obs = await stagehand.observe(s.text);
+              const obs = await stagehand.observe(s.text, { page: targetPage });
               const target = obs?.data?.[0];
               if (target?.selector) {
                 targetSelector = target.selector;
-                await highlightElement(page, targetSelector);
-                await page.waitForTimeout(100);
+                await highlightElement(targetPage, targetSelector);
+                await targetPage.waitForTimeout(100);
               }
             } catch (obsErr) {
               logger.debug("Bỏ qua lỗi observe định vị trước:", obsErr.message);
@@ -358,11 +369,11 @@ export class StagehandService {
 
             // Xóa highlight trước khi thực hiện hành động
             if (targetSelector) {
-              await clearHighlight(page, targetSelector);
+              await clearHighlight(targetPage, targetSelector);
             }
 
-            // Thực hiện hành động
-            const opts = { timeout: this.config.timeouts.stepMs };
+            // Thực hiện hành động (luôn ghim chặt targetPage)
+            const opts = { timeout: this.config.timeouts.stepMs, page: targetPage };
             if (variables) opts.variables = variables;
             const r = await stagehand.act(s.text, opts);
             const d = r?.data || r;
@@ -379,7 +390,7 @@ export class StagehandService {
 
             // Kiểm tra cảnh báo / lỗi toàn cục sau khi hành động (Global Alert Detection)
             try {
-              const detectedAlert = await page.evaluate(() => {
+              const detectedAlert = await targetPage.evaluate(() => {
                 const alertEl = document.querySelector('[role="alert"], [data-test="error"], .alert-danger, .error-message-container:not(:empty)');
                 if (alertEl && alertEl.offsetParent !== null) {
                   return alertEl.innerText?.trim() || null;
@@ -393,14 +404,14 @@ export class StagehandService {
             } catch {}
 
             // Khoảnh khắc 2: SAU KHI HÀNH ĐỘNG (đợi UI cập nhật)
-            await page.waitForTimeout(600);
+            await targetPage.waitForTimeout(600);
             await takeShot(step.status === "passed" ? "after" : "error", {
               label: step.status === "passed" ? "Sau khi thực hiện" : "Khi gặp lỗi",
               sublabel: step.status === "passed" ? "Giao diện đã cập nhật" : (step.detectedAlert || "Trạng thái thất bại"),
             });
 
           } else if (s.type === "observe") {
-            const r = await stagehand.observe(s.text);
+            const r = await stagehand.observe(s.text, { page: targetPage });
             const d = r?.data ?? r;
             const count = Array.isArray(d) ? d.length : 0;
 
@@ -422,13 +433,13 @@ export class StagehandService {
             }
 
             if (count > 0 && d[0]?.selector) {
-              await highlightElement(page, d[0].selector);
-              await page.waitForTimeout(100);
+              await highlightElement(targetPage, d[0].selector);
+              await targetPage.waitForTimeout(100);
               await takeShot(step.status === "passed" ? "view" : "error", {
                 label: step.status === "passed" ? "Phần tử tìm thấy" : "Lỗi phát hiện trên màn hình",
                 sublabel: d[0].description || (step.status === "passed" ? "Đã highlight phần tử" : "Phát hiện lỗi"),
               });
-              await clearHighlight(page, d[0].selector);
+              await clearHighlight(targetPage, d[0].selector);
             } else {
               await takeShot(step.status === "passed" ? "view" : "error", {
                 label: step.status === "passed" ? "Kết quả kiểm tra" : "Không tìm thấy",
@@ -436,11 +447,11 @@ export class StagehandService {
             }
 
           } else {
-            // type: extract
+            // type: extract (luôn ghim targetPage)
             const schema = z.object({
               value: z.string().describe("the value read from the page, exactly as displayed"),
             });
-            const r = await stagehand.extract(s.text, schema);
+            const r = await stagehand.extract(s.text, schema, { page: targetPage });
             const d = r?.data ?? r;
             if (d?.value !== undefined && d?.value !== null && d?.value !== "") {
               step.value = d.value;
