@@ -209,10 +209,15 @@ export class StagehandService {
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
+        "--ignore-certificate-errors",
+        "--ignore-certificate-errors-spki-list",
+        "--allow-insecure-localhost",
+        "--allow-running-insecure-content",
       ];
       browser = await localBrowser.launch({
         headless: this.config.browser.headless,
         chromiumSandbox: false,
+        ignoreHTTPSErrors: true,
         args: browserArgs,
       });
       if (browser) {
