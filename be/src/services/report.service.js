@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { logger } from "../utils/logger.js";
+import { SCREENSHOTS_DIR } from "./storage.service.js";
 
 function escapeHtml(str) {
   if (!str) return "";
@@ -46,12 +47,23 @@ async function getBase64DataUrl(relativeUrl) {
     }
     cleanPath = cleanPath.replace(/^\/+/, "");
 
-    const candidatePaths = [
+    const candidatePaths = [];
+    if (cleanPath.startsWith("screenshots/") || cleanPath.startsWith("screenshots\\")) {
+      const relInsideShots = cleanPath.replace(/^screenshots[/\\]/, "");
+      const anchored = path.resolve(SCREENSHOTS_DIR, relInsideShots);
+      if (anchored.startsWith(SCREENSHOTS_DIR + path.sep)) {
+        candidatePaths.push(anchored);
+      }
+    } else {
+      const anchored = path.resolve(SCREENSHOTS_DIR, path.basename(cleanPath));
+      if (anchored.startsWith(SCREENSHOTS_DIR + path.sep)) {
+        candidatePaths.push(anchored);
+      }
+    }
+    candidatePaths.push(
       path.resolve(process.cwd(), cleanPath),
-      path.resolve(process.cwd(), "be", cleanPath),
-      path.resolve(process.cwd(), "..", cleanPath),
-      path.resolve(process.cwd(), "screenshots", path.basename(cleanPath)),
-    ];
+      path.resolve(process.cwd(), "be", cleanPath)
+    );
 
     let buffer = null;
     for (const p of candidatePaths) {
@@ -62,7 +74,14 @@ async function getBase64DataUrl(relativeUrl) {
     }
 
     if (buffer) {
-      return `data:image/png;base64,${buffer.toString("base64")}`;
+      const ext = path.extname(cleanPath).toLowerCase();
+      let mime = "image/png";
+      if (ext === ".jpg" || ext === ".jpeg") {
+        mime = "image/jpeg";
+      } else if (ext === ".webp") {
+        mime = "image/webp";
+      }
+      return `data:${mime};base64,${buffer.toString("base64")}`;
     }
     return relativeUrl;
   } catch (err) {
@@ -145,8 +164,11 @@ export class ReportService {
           id: feat.id,
           name: feat.name || "Tính năng",
           status: featStatus,
+          verdict: feat.verdict || featStatus,
+          assertionSummary: feat.assertionSummary || null,
           durationMs: feat.durationMs || 0,
           error: feat.error || null,
+          warning: feat.warning || null,
           steps: processedSteps,
           rawStepStrings: Array.isArray(feat.steps) && typeof feat.steps[0] === "string" ? feat.steps : [],
         });
@@ -202,8 +224,11 @@ export class ReportService {
         id: run.id,
         name: reportTitle,
         status: isPassedOverall ? "PASSED" : "FAILED",
+        verdict: run.verdict || (isPassedOverall ? "PASSED" : "FAILED"),
+        assertionSummary: run.assertionSummary || null,
         durationMs: durationMs,
         error: run.error || null,
+        warning: run.warning || null,
         steps: processedSteps,
         rawStepStrings: [],
       });
@@ -426,6 +451,8 @@ export class ReportService {
     .type-act { background: rgba(129, 140, 248, 0.15); color: #818cf8; border: 1px solid rgba(129, 140, 248, 0.3); }
     .type-assert { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
     .type-view { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .type-wait { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .type-browser { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
     .step-text {
       font-size: 13px;
       font-weight: 600;
@@ -629,6 +656,15 @@ export class ReportService {
           <div>${escapeHtml(run.notes)}</div>
         </div>
       ` : ""}
+
+      ${(run.warning || processedFeatures.some(f => f.warning)) ? `
+        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; padding: 12px 16px; margin-top: 14px; display: flex; align-items: center; gap: 10px; color: #fde68a;">
+          <span style="font-size: 20px;">⚠️</span>
+          <div style="font-size: 13px; line-height: 1.4;">
+            <strong>Khuyến nghị Đảm bảo Chất lượng (QA Audit):</strong> ${escapeHtml(run.warning || processedFeatures.find(f => f.warning)?.warning || "")}
+          </div>
+        </div>
+      ` : ""}
     </div>
 
     <!-- Danh sách các tính năng và bước thực thi -->
@@ -638,17 +674,34 @@ export class ReportService {
 
     ${processedFeatures.map((feat, featIdx) => {
       const featPassed = feat.status === "PASSED";
+      const featVerdict = String(feat.verdict || (featPassed ? "PASSED" : "FAILED")).toUpperCase();
+      const featIsBroken = featVerdict === "BROKEN";
+      const featHasWarn = featVerdict === "PASSED_WITH_WARNINGS";
+      const featBadgeLabel = featHasWarn
+        ? "⚠ ĐẠT CÓ LƯU Ý"
+        : featPassed
+          ? "✓ ĐẠT"
+          : featIsBroken
+            ? "⚡ LỖI KỊCH BẢN / HẠ TẦNG"
+            : "✕ LỖI SẢN PHẨM";
+      const featBadgeStyle = featHasWarn
+        ? "background:rgba(245,158,11,0.16);color:#fbbf24;border:1px solid rgba(245,158,11,0.35);"
+        : featIsBroken
+          ? "background:rgba(168,85,247,0.16);color:#c084fc;border:1px solid rgba(168,85,247,0.35);"
+          : "";
+      const isSmokeOnly = Boolean(feat.assertionSummary?.isSmokeOnly);
       return `
       <div class="feature-card">
         <div class="feature-header">
           <div class="feature-title">
             <span style="color: #818cf8;">#${featIdx + 1}</span>
             <span>${escapeHtml(feat.name)}</span>
+            ${isSmokeOnly && featPassed ? `<span class="step-type" style="background:rgba(148,163,184,0.16);color:#cbd5e1;margin-left:6px;" title="Kịch bản chưa có bước Kiểm tra (Assert)">Smoke Only</span>` : ""}
           </div>
           <div class="feature-meta">
             <span>${formatDuration(feat.durationMs)}</span>
-            <span class="badge-feature ${featPassed ? "badge-passed" : "badge-failed"}">
-              ${featPassed ? "✓ ĐẠT" : "✕ LỖI"}
+            <span class="badge-feature ${featPassed ? "badge-passed" : "badge-failed"}" ${featBadgeStyle ? `style="${featBadgeStyle}"` : ""}>
+              ${featBadgeLabel}
             </span>
           </div>
         </div>
@@ -656,7 +709,7 @@ export class ReportService {
         <div class="feature-content">
           ${feat.error ? `
             <div class="error-box">
-              <strong>Lỗi tính năng:</strong> ${escapeHtml(feat.error)}
+              <strong>${featIsBroken ? "Lỗi kịch bản / hạ tầng:" : "Lỗi tính năng:"}</strong> ${escapeHtml(feat.error)}
             </div>
           ` : ""}
 
@@ -666,12 +719,39 @@ export class ReportService {
             </div>
           ` : feat.steps.map((st, stepIdx) => {
             const stPassed = st.status === "passed";
+            const stVerdict = String(st.verdict || (stPassed ? "PASSED" : "FAILED")).toUpperCase();
+            const stIsBroken = !stPassed && stVerdict === "BROKEN";
+            const stHasWarn = stPassed && (stVerdict === "PASSED_WITH_WARNINGS" || (Array.isArray(st.uxWarnings) && st.uxWarnings.length > 0));
             const stType = (st.type || "act").toLowerCase();
             const isNav = stType === "navigate" || stType === "goto";
-            const isAssert = stType === "assert" || stType === "observe";
+            const isAssert = stType === "assert" || stType === "observe" || Boolean(st.isAssertionStep);
             const isView = stType === "view";
-            const typeClass = isNav ? "type-navigate" : isAssert ? "type-assert" : isView ? "type-view" : "type-act";
-            const typeName = isNav ? "Điều hướng" : isAssert ? "Kiểm tra" : isView ? "Giao diện" : "Hành động";
+            const isWait = stType === "wait" || stType === "sleep";
+            const isBrowser = stType === "browser";
+            const typeClass = isNav ? "type-navigate" : isAssert ? "type-assert" : isView ? "type-view" : isWait ? "type-wait" : isBrowser ? "type-browser" : "type-act";
+            const typeName = isNav ? "Điều hướng" : isAssert ? "Kiểm tra" : isView ? "Giao diện" : isWait ? "Tạm dừng" : isBrowser ? "Trình duyệt" : "Hành động";
+            const stStatusLabel = stHasWarn
+              ? "Đạt (Lưu ý)"
+              : stPassed
+                ? "Đạt"
+                : st.isSoft
+                  ? "Cảnh báo Soft"
+                  : stIsBroken
+                    ? "Broken (Hạ tầng/AI)"
+                    : "Lỗi sản phẩm";
+            const stStatusStyle = stHasWarn
+              ? "background:rgba(245,158,11,0.16);color:#fbbf24;"
+              : stIsBroken
+                ? "background:rgba(168,85,247,0.18);color:#c084fc;"
+                : "";
+            const ev = st.evidence && (st.evidence.expected || st.evidence.actual) ? st.evidence : null;
+            const oracleLabelMap = {
+              deterministic_assert: "Tất định (Playwright)",
+              ai_judge: "Trọng tài AI (Judge)",
+              causal_guardrail: "Hàng rào Nhân quả",
+              mechanical_action: "Hậu kiểm cơ học",
+            };
+            const oracleLabel = ev?.oracleSource ? (oracleLabelMap[ev.oracleSource] || ev.oracleSource) : "";
 
             return `
             <div class="step-item">
@@ -679,19 +759,42 @@ export class ReportService {
                 <div class="step-left">
                   <span class="step-num">${stepIdx + 1}</span>
                   <span class="step-type ${typeClass}">${typeName}</span>
+                  ${st.executionMode === "cache" ? `<span class="step-type" style="background:rgba(16,185,129,0.16);color:#34d399;">⚡ Cache</span>` : ""}
+                  ${st.isSoft ? `<span class="step-type" style="background:rgba(245,158,11,0.16);color:#fbbf24;">Soft</span>` : ""}
                   <span class="step-text">${escapeHtml(st.text || st.step || "Thao tác")}</span>
                 </div>
                 <div class="step-right">
                   ${st.durationMs ? `<span class="step-time">${formatDuration(st.durationMs)}</span>` : ""}
-                  <span class="step-status ${stPassed ? "status-passed" : "status-failed"}">
-                    ${stPassed ? "Đạt" : "Lỗi"}
+                  <span class="step-status ${stPassed ? "status-passed" : "status-failed"}" ${stStatusStyle ? `style="${stStatusStyle}"` : ""}>
+                    ${stStatusLabel}
                   </span>
                 </div>
               </div>
 
+              ${stPassed && (st.value || st.message) ? `
+                <div style="margin-top:8px; padding:7px 11px; border-radius:8px; background:rgba(15,23,42,0.65); border:1px solid #1e293b; font-size:11.5px; color:#94a3b8;">
+                  ${st.message ? `<span>${escapeHtml(st.message)}</span>` : ""}
+                  ${st.value ? `<span style="margin-left:8px; color:#38bdf8; font-family:monospace;">Biến trích xuất: "${escapeHtml(st.value)}"</span>` : ""}
+                </div>
+              ` : ""}
+
+              ${ev ? `
+                <div style="margin-top:6px; padding:7px 11px; border-radius:8px; background:${ev.passed ? "rgba(16,185,129,0.06)" : "rgba(244,63,94,0.08)"}; border:1px solid ${ev.passed ? "rgba(16,185,129,0.22)" : "rgba(244,63,94,0.28)"}; font-size:11px; color:#cbd5e1; display:flex; flex-direction:column; gap:3px;">
+                  ${oracleLabel ? `<div style="color:#94a3b8; font-size:10.5px;"><strong>Nguồn thẩm định:</strong> ${escapeHtml(oracleLabel)}${ev.scope ? ` · <strong>Phạm vi:</strong> ${escapeHtml(ev.scope)}` : ""}</div>` : ""}
+                  ${ev.expected ? `<div><strong style="color:#93c5fd;">Kỳ vọng (Expected):</strong> ${escapeHtml(ev.expected)}</div>` : ""}
+                  ${ev.actual ? `<div><strong style="color:${ev.passed ? "#6ee7b7" : "#fda4af"};">Thực tế (Actual):</strong> ${escapeHtml(ev.actual)}</div>` : ""}
+                </div>
+              ` : ""}
+
+              ${stPassed && Array.isArray(st.uxWarnings) && st.uxWarnings.length > 0 ? `
+                <div style="margin-top:6px; padding:6px 10px; border-radius:8px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); font-size:11px; color:#fbbf24;">
+                  <strong>Lưu ý phi chặn (Advisory):</strong> ${escapeHtml(st.uxWarnings.join(" • "))}
+                </div>
+              ` : ""}
+
               ${!stPassed && (st.error || st.message) ? `
                 <div class="error-box">
-                  <strong>Lỗi:</strong> ${escapeHtml(st.error || st.message)}
+                  <strong>${stIsBroken ? "Lỗi kịch bản / Hạ tầng (Broken):" : "Lỗi sản phẩm (Failed):"}</strong> ${escapeHtml(st.error || st.message)}
                   ${st.detectedAlert ? `<div style="margin-top:6px; font-size:11px; color:#fca5a5;"><strong>Cảnh báo trên trang:</strong> ${escapeHtml(st.detectedAlert)}</div>` : ""}
                 </div>
               ` : ""}
@@ -706,15 +809,16 @@ export class ReportService {
                     const tagText = isBefore ? "Trước" : isError ? "Lỗi" : isV ? "Trang" : "Sau";
                     const subText = shot.sublabel || (isBefore ? "Tiêu điểm viền đỏ" : isV ? "Trang web" : "Kết quả tương tác");
 
+                    const safeImgSrc = escapeHtml(shot.base64Url || "");
                     return `
                     ${shotIdx > 0 ? `<span class="arrow-divider">→</span>` : ""}
-                    <div class="shot-card" onclick="openLightbox('${shot.base64Url}')" title="Nhấp để phóng to">
+                    <div class="shot-card" onclick="openLightbox('${safeImgSrc}')" title="Nhấp để phóng to">
                       <div class="shot-header">
                         <span class="shot-tag ${tagClass}">${tagText}</span>
                         <span class="shot-sub">${escapeHtml(subText)}</span>
                       </div>
                       <div class="shot-img-wrapper">
-                        <img src="${shot.base64Url}" alt="${escapeHtml(shot.label || "Ảnh chụp")}" loading="lazy" />
+                        <img src="${safeImgSrc}" alt="${escapeHtml(shot.label || "Ảnh chụp")}" loading="lazy" />
                       </div>
                     </div>
                     `;

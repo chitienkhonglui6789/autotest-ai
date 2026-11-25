@@ -28,7 +28,7 @@ export const createApp = () => {
   // 3. Phục vụ tĩnh Frontend (Production / Docker build)
   if (fs.existsSync(clientDistDir)) {
     app.use(express.static(clientDistDir));
-    app.get(/^(?!\/(screenshots|run|health|status|config|env|model|history)).*$/, (req, res, next) => {
+    app.get(/^(?!\/(screenshots|run|batches|health|status|config|env|model|history|projects|cache|steps)(?:\/|$)).*$/, (req, res, next) => {
       if (req.accepts("html")) {
         return res.sendFile(path.join(clientDistDir, "index.html"));
       }

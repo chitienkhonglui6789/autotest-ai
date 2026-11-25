@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CẨM NANG HƯỚNG DẪN SỬ DỤNG &amp; QUY TẮC SOẠN KỊCH BẢN - AUTOTEST STUDIO v9.0</title>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-dark: #3730a3;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --info: #0284c7;
+    --bg-page: #f1f5f9;
+    --card-bg: #ffffff;
+    --border: #cbd5e1;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+  }
+
+  @page {
+    size: A4;
+    margin: 14mm 12mm 14mm 12mm;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 28px 20px 80px 20px;
+  }
+
+  /* Action Bar (Hidden on Print) */
+  .top-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    background: #ffffff;
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  }
+  .top-actions-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+  }
+  .top-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+  }
+  .btn-primary {
+    background: #4f46e5;
+    color: #ffffff;
+  }
+  .btn-primary:hover {
+    background: #4338ca;
+  }
+  .btn-outline {
+    background: #f8fafc;
+    color: #1e293b;
+    border-color: #cbd5e1;
+  }
+  .btn-outline:hover {
+    background: #e2e8f0;
+  }
+
+  /* Header Banner */
+  .hero-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+    color: #ffffff;
+    border-radius: 16px;
+    padding: 34px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.25);
+    page-break-inside: avoid;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.25);
+    color: #c7d2fe;
+    border: 1px solid rgba(165, 180, 252, 0.35);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+  .hero-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+    color: #ffffff;
+    letter-spacing: -0.4px;
+  }
+  .hero-subtitle {
+    font-size: 14.5px;
+    color: #cbd5e1;
+    margin: 0 0 22px 0;
+    max-width: 880px;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .meta-item {
+    font-size: 12.5px;
+    color: #e2e8f0;
+  }
+  .meta-item strong {
+    color: #38bdf8;
+    display: block;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  /* Table of Contents */
+  .toc-box {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--primary);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    page-break-inside: avoid;
+  }
+  .toc-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 24px;
+    font-size: 13.5px;
+  }
+  .toc-link {
+    color: #334155;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+  }
+  .toc-link:hover {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+  .toc-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-weight: 700;
+    font-size: 11.5px;
+    flex-shrink: 0;
+  }
+
+  /* Section styles */
+  .section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 26px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  }
+  .section-title {
+    font-size: 19px;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    page-break-after: avoid;
+  }
+  .section-badge {
+    background: #1e3a8a;
+    color: #ffffff;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 15.5px;
+    color: #0f172a;
+    margin-top: 22px;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+  }
+
+  p {
+    margin: 0 0 10px 0;
+  }
+
+  /* Three-Stage Grid */
+  .stage-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 14px 0;
+    page-break-inside: avoid;
+  }
+  .stage-card {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .stage-1 { border-top: 4px solid #3b82f6; }
+  .stage-2 { border-top: 4px solid #f59e0b; }
+  .stage-3 { border-top: 4px solid #10b981; }
+
+  /* Table styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  tr {
+    page-break-inside: avoid;
+  }
+  th, td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 700;
+  }
+  tr:nth-child(even) { background-color: #f8fafc; }
+
+  /* Callouts & Comparison Boxes */
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 12px 0 18px 0;
+    page-break-inside: avoid;
+  }
+  .compare-card {
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  .card-wrong {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--danger);
+  }
+  .card-correct {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid var(--success);
+  }
+  .card-header-wrong {
+    font-weight: 700;
+    color: #991b1b;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+  }
+  .card-header-correct {
+    font-weight: 700;
+    color: #166534;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+  }
+
+  .callout {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 13.5px;
+    page-break-inside: avoid;
+  }
+  .callout-warn {
+    background-color: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 4px solid var(--warning);
+    color: #92400e;
+  }
+  .callout-info {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-left: 4px solid var(--primary);
+    color: #1e40af;
+  }
+  .callout-success {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid var(--success);
+    color: #166534;
+  }
+  .callout-danger {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--danger);
+    color: #991b1b;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    background: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #b91c1c;
+  }
+  .code-block {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    margin: 12px 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    page-break-inside: avoid;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .tag-goto { background: #e0e7ff; color: #3730a3; }
+  .tag-act { background: #fef3c7; color: #92400e; }
+  .tag-obs { background: #dcfce7; color: #166534; }
+  .tag-lan { background: #e0f2fe; color: #0369a1; }
+
+  .feature-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 14px 0;
+    page-break-inside: avoid;
+  }
+  .feature-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  .feature-box h4 {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    color: #0f172a;
+  }
+
+  .footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #cbd5e1;
+  }
+
+  @media print {
+    body {
+      background-color: #ffffff;
+      font-size: 11.5px;
+    }
+    .container {
+      max-width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .section {
+      box-shadow: none;
+      margin-bottom: 16px;
+      padding: 18px 20px;
+      border: 1px solid #cbd5e1;
+    }
+    .hero-banner {
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .stage-card, .compare-card, .callout, .code-block, th, .tag, .toc-num, .section-badge, .feature-box {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- THANH CÔNG CỤ NHANH (ẨN KHI IN PDF) -->
+  <div class="top-actions no-print">
+    <div class="top-actions-left">
+      <span>📘</span>
+      <span>Tài liệu Hướng dẫn Sử dụng Chính thức — AutoTest Studio v9.0 (Playwright Native + Micro-ReAct)</span>
+    </div>
+    <div class="top-actions-right">
+      <button onclick="window.print()" class="btn-action btn-primary">
+        <span>🖨️</span>
+        <span>In / Xuất PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- BANNER TIÊU ĐỀ -->
+  <div class="hero-banner">
+    <div class="hero-badge">Cẩm Nang Vận Hành Chuẩn Hóa • Kiến Trúc v9.0</div>
+    <h1 class="hero-title">HƯỚNG DẪN SỬ DỤNG AUTOTEST STUDIO (NO-CODE TESTER)</h1>
+    <p class="hero-subtitle">
+      Giải pháp kiểm thử tự động hoàn toàn bằng tiếng Việt tự nhiên, chạy trực tiếp trên Playwright Native kết hợp vòng lặp thông minh Micro-ReAct AI (hỗ trợ Qwen 3.8-27B Local &amp; Cloud LLM) và bộ nhớ Step Trace Cache "học 1 lần – phát lại 0.05s".
+    </p>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Công nghệ lõi</strong>
+        Playwright Native + Micro-ReAct
+      </div>
+      <div class="meta-item">
+        <strong>Thực thi 3 tầng</strong>
+        ⚡ Cache → FastPath → AI Loop
+      </div>
+      <div class="meta-item">
+        <strong>Biến động &amp; Hậu kiểm</strong>
+        {{LAST_EXTRACTED}} &amp; [soft]
+      </div>
+      <div class="meta-item">
+        <strong>Xuất báo cáo</strong>
+        HTML Độc Lập (Nhúng Base64)
+      </div>
+    </div>
+  </div>
+
+  <!-- MỤC LỤC TRA CỨU NHANH -->
+  <div class="toc-box">
+    <div class="toc-title">Mục Lục Tài Liệu</div>
+    <div class="toc-grid">
+      <a href="#sec-1" class="toc-link"><span class="toc-num">1</span> Kiến trúc Thực thi 3 Tầng &amp; Cơ chế Step Cache ⚡</a>
+      <a href="#sec-2" class="toc-link"><span class="toc-num">2</span> Công cụ Dán &amp; Tách bước Thông minh (Smart Split)</a>
+      <a href="#sec-3" class="toc-link"><span class="toc-num">3</span> Quy chuẩn Soạn bước, Trích xuất Biến &amp; [soft] Assertion</a>
+      <a href="#sec-4" class="toc-link"><span class="toc-num">4</span> Hậu kiểm UI, Hộp thoại Native (Alert/Confirm) &amp; Đa Tab</a>
+      <a href="#sec-5" class="toc-link"><span class="toc-num">5</span> Cấu hình Local LLM (Qwen 3.8-27B) &amp; Theo dõi Live</a>
+      <a href="#sec-6" class="toc-link"><span class="toc-num">6</span> Bằng chứng trực quan, Giải mã lỗi &amp; Xuất báo cáo HTML</a>
+    </div>
+  </div>
+
+  <!-- PHẦN 1 -->
+  <div id="sec-1" class="section">
+    <h2 class="section-title"><span class="section-badge">PHẦN 1</span> Kiến Trúc Thực Thi 3 Tầng &amp; Cơ Chế Step Trace Cache ⚡</h2>
+    <p>
+      Khác với các hệ thống kiểm thử cũ phải gọi AI phân loại từng bước trước khi chạy, AutoTest Studio v9.0 truyền thẳng bước tiếng Việt của bạn vào <strong>Playwright Native Engine</strong> và xử lý qua 3 tầng tối ưu tốc độ:
+    </p>
+    
+    <div class="stage-grid">
+      <div class="stage-card stage-1">
+        <span class="tag tag-obs">Tầng 1 • Step Cache ⚡</span>
+        <h4 style="margin: 8px 0 4px 0;">Phát lại tức thì (~0.05s)</h4>
+        <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">
+          Từ lần chạy thứ 2 trở đi, bước đã ghi nhớ được Playwright phát lại thẳng bằng vân tay DOM (<strong>0 gọi AI</strong>). Nếu web đổi giao diện làm lệch cache, hệ thống tự chữa lành và học lại.
+        </p>
+      </div>
+      <div class="stage-card stage-2">
+        <span class="tag tag-goto">Tầng 2 • FastPath</span>
+        <h4 style="margin: 8px 0 4px 0;">Đường tắt tất định (0ms AI)</h4>
+        <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">
+          Các bước đơn thuần như mở URL (<code>Mở trang http://...</code>), chờ thời gian (<code>Chờ 3s</code>) hoặc kiểm tra chữ trong ngoặc kép chạy thẳng bằng Playwright mà không cần hỏi AI.
+        </p>
+      </div>
+      <div class="stage-card stage-3">
+        <span class="tag tag-act">Tầng 3 • Micro-ReAct</span>
+        <h4 style="margin: 8px 0 4px 0;">Vòng lặp Tác tử Vi mô (≤12 nhịp)</h4>
+        <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">
+          AI (Local Qwen 3.8-27B hoặc Cloud LLM) quan sát danh sách phần tử thật (cả Main Page &amp; Iframe), chọn đúng <code>targetId</code>, hỗ trợ cả dropdown lồng nhau hay thao tác nhiều nhịp rồi lưu Cache cho lần sau.
+        </p>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>⚡ Quản lý Step Cache ngay trong Studio:</strong> Ở tab <strong>Quản lý tính năng</strong> và <strong>Trình chạy test</strong>, các bước đã lưu Cache sẽ hiện nhãn xanh <code>⚡ Cache</code>. Bạn có thể bấm xóa Cache cho từng bước hoặc bấm <strong>"Quên Cache"</strong> cho cả tính năng bất cứ lúc nào để AI học lại từ đầu.
+    </div>
+  </div>
+
+  <!-- PHẦN 2 -->
+  <div id="sec-2" class="section">
+    <h2 class="section-title"><span class="section-badge">PHẦN 2</span> Công Cụ Dán &amp; Tách Bước Thông Minh (Smart Split)</h2>
+    <p>
+      Nếu bạn nhận được mô tả test case dạng đoạn văn dài (từ Jira, Zalo, Excel hoặc tài liệu Word), <strong>đừng nhồi cả 7–8 câu vào 1 ô bước duy nhất</strong> vì sẽ khó tái sử dụng Cache và khó khoanh vùng bước lỗi.
+    </p>
+    <div class="comparison-grid">
+      <div class="compare-card card-wrong">
+        <div class="card-header-wrong">❌ TRÁNH VIẾT 1 BƯỚC QUÁ DÀI</div>
+        <code>Bước 1: Mở trang http://127.0.0.1:5050, nhập admin và 123456, nhấn Đăng nhập, vào Quản lý Đơn hàng, chọn Smartphone X, thêm vào giỏ, thanh toán với mã DISCOUNT10 và kiểm tra email...</code>
+      </div>
+      <div class="compare-card card-correct">
+        <div class="card-header-correct">✓ DÙNG TÍNH NĂNG "DÁN &amp; TÁCH BƯỚC"</div>
+        • Dán nhiều dòng trực tiếp vào ô bước → Studio tự động tách từng dòng.<br>
+        • Hoặc bấm nút <strong>✨ Dán &amp; Tách bước</strong> ở góc trên trình soạn thảo để chọn tách nhanh theo câu (0ms) hoặc AI phân tích tiếng Việt thành 8–10 bước rõ ràng!
+      </div>
+    </div>
+  </div>
+
+  <!-- PHẦN 3 -->
+  <div id="sec-3" class="section">
+    <h2 class="section-title"><span class="section-badge">PHẦN 3</span> Quy Chuẩn Soạn Bước, Biến Động {{...}} &amp; [soft] Assertion</h2>
+
+    <h3>A. Cú pháp Tiếng Việt Tự nhiên Khuyên dùng</h3>
+    <div class="comparison-grid">
+      <div class="compare-card card-wrong">
+        <div class="card-header-wrong">❌ CÁCH VIẾT MƠ HỒ (Dễ gây PASS ảo)</div>
+        • <code>Vào web bán hàng</code> (Thiếu URL <code>http://...</code>).<br>
+        • <code>Gõ tài khoản và mật khẩu</code> (Thiếu giá trị cần nhập).<br>
+        • <code>Kiểm tra xem đăng nhập được chưa?</code> (Câu hỏi nghi vấn mở!).
+      </div>
+      <div class="compare-card card-correct">
+        <div class="card-header-correct">✓ CÁCH VIẾT CHUẨN (Chính xác 100%)</div>
+        • <code>Mở trang http://127.0.0.1:5050</code><br>
+        • <code>Nhập admin vào ô Tên đăng nhập</code><br>
+        • <code>Bấm nút 'Thêm vào giỏ' của sản phẩm Smartphone X</code><br>
+        • <code>Kiểm tra xuất hiện thông báo 'Thanh toán thành công'</code>
+      </div>
+    </div>
+
+    <h3>B. Trích xuất Dữ liệu động &amp; Biến {{LAST_EXTRACTED}}</h3>
+    <div class="callout callout-success">
+      <strong>📦 Truyền dữ liệu giữa các bước hoàn toàn tự động:</strong><br>
+      1. Đọc giá trị sinh động trên màn hình: <code>Đọc mã khách hàng VIP hiển thị và lưu vào biến {{ma_kh}}</code><br>
+      2. Sử dụng lại ở các bước sau bằng <code>{{ma_kh}}</code> hoặc từ khóa chung <code>{{LAST_EXTRACTED}}</code> (giá trị vừa đọc gần nhất), ví dụ:<br>
+      <code>Nhập {{LAST_EXTRACTED}} vào ô Tìm kiếm đơn hàng</code> hoặc <code>Kiểm tra trên trang có chữ {{ma_kh}}</code>.
+    </div>
+
+    <h3>C. Kiểm tra mềm — Soft Assertion ([soft])</h3>
+    <div class="callout callout-warn">
+      <strong>🛡️ Thêm thẻ <code>[soft]</code> hoặc bấm nút <code>soft</code> ở cuối bước kiểm tra:</strong><br>
+      • Bình thường, nếu một bước Kiểm tra bị lỗi (FAIL), kịch bản sẽ dừng ngay lập tức.<br>
+      • Khi gắn <code>[soft]</code> (ví dụ: <code>Kiểm tra hiển thị nhãn Mới nhất [soft]</code>), nếu điều kiện không đạt, hệ thống ghi nhận trạng thái cảnh báo nhưng <strong>vẫn chạy tiếp các bước còn lại</strong> đến hết luồng để tổng hợp đầy đủ lỗi trong 1 lần chạy!
+    </div>
+  </div>
+
+  <!-- PHẦN 4 -->
+  <div id="sec-4" class="section">
+    <h2 class="section-title"><span class="section-badge">PHẦN 4</span> Hậu Kiểm UI, Native Dialogs (Alert/Confirm) &amp; Đa Tab</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 24%;">Tính năng đặc biệt</th>
+          <th style="width: 38%;">Cách xử lý tự động của Studio v9.0</th>
+          <th style="width: 38%;">Ví dụ câu lệnh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Checkbox / Radio / Toggle</strong></td>
+          <td>Playwright tự kiểm tra DOM thực tế <code>checked</code> / <code>aria-checked</code> để đảm bảo không click trượt hoặc tick ngược trạng thái.</td>
+          <td><code>Tick chọn ô "Ghi nhớ đăng nhập"</code><br><code>Kiểm tra ô "Ghi nhớ đăng nhập" đã được đánh dấu</code></td>
+        </tr>
+        <tr>
+          <td><strong>Alert / Confirm / Prompt</strong></td>
+          <td>Tự động bắt sự kiện trình duyệt trong 0.01s, không bao giờ làm treo trình duyệt. Mặc định chọn <strong>Đồng ý (Accept)</strong>, hoặc tự động <strong>Hủy (Dismiss)</strong> nếu câu lệnh nhắc hủy.</td>
+          <td><code>Bấm nút Xóa bản ghi và xác nhận hộp thoại</code><br><code>Bấm nút Hủy tài khoản nhưng chọn Hủy bỏ ở hộp thoại</code></td>
+        </tr>
+        <tr>
+          <td><strong>Đa Cửa sổ / Đa Tab</strong></td>
+          <td>Tự động nhận diện tab/cửa sổ bật lên mới (Popup, SSO) và quay về tab gốc khi ra lệnh. Lưu ý dùng từ khóa <strong>"Tab"</strong> hoặc <strong>"Cửa sổ"</strong>.</td>
+          <td><code>Chuyển sang tab mới</code><br><code>Quay lại tab đầu tiên</code><br><code>Đóng tab hiện tại</code></td>
+        </tr>
+        <tr>
+          <td><strong>Iframe nhúng &amp; Upload File</strong></td>
+          <td>Bộ quét DOM xuyên qua cả Main Frame và mọi Iframe nhúng bên trong; hỗ trợ gán trực tiếp tệp từ thư mục dữ liệu thử nghiệm.</td>
+          <td><code>Tải tệp mẫu lên ở khung đính kèm</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PHẦN 5 -->
+  <div id="sec-5" class="section">
+    <h2 class="section-title"><span class="section-badge">PHẦN 5</span> Cấu Hình AI (Local Qwen 3.8-27B / Cloud) &amp; Theo Dõi Trực Tiếp</h2>
+    <div class="feature-grid-2">
+      <div class="feature-box">
+        <h4>1. Chọn nhanh Preset &amp; Test AI trong 1 Click</h4>
+        <p style="margin: 0; color: var(--text-muted);">
+          • Nhấn vào pill tên Model AI ở thanh trên cùng để mở <strong>Cấu hình (.env)</strong>.<br>
+          • Chọn nhanh preset <strong>Ollama · Qwen 3.8-27B</strong>, <strong>LM Studio</strong> hoặc <strong>Google Gemini</strong>.<br>
+          • Bấm nút <strong>"🔌 Kiểm tra kết nối AI"</strong> để đo độ trễ thực tế trước khi chạy test, và bật/tắt <code>HEADLESS</code> trực quan (áp dụng ngay không cần khởi động lại Server).
+        </p>
+      </div>
+      <div class="feature-box">
+        <h4>2. Theo dõi tiến độ từng bước thời gian thực</h4>
+        <p style="margin: 0; color: var(--text-muted);">
+          • Dùng nút <strong>▶ Chạy ngay</strong> ngay trong Trình soạn thảo hoặc chọn nhiều tính năng ở tab <strong>Trình chạy test</strong>.<br>
+          • Trong tab <strong>Lịch sử kiểm thử</strong>, tính năng đang chạy tự mở rộng để hiển thị: bước số mấy, đang chạy qua <code>⚡ Cache</code> hay <code>🤖 AI Nhịp x/12</code>, suy luận hiện tại của AI và ảnh chụp ngay khi từng bước vừa xong!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHẦN 6 -->
+  <div id="sec-6" class="section">
+    <h2 class="section-title"><span class="section-badge">PHẦN 6</span> Bằng Chứng Trực Quan, Mã Lỗi &amp; Xuất Báo Cáo HTML</h2>
+
+    <h3>A. Bằng chứng ảnh chụp Trước / Sau thao tác</h3>
+    <p>Mỗi bước đều lưu lại ảnh chụp sắc nét có thể bấm để phóng to trong Lightbox:</p>
+    <ul>
+      <li><strong>Ảnh Trước (Before - Viền đỏ):</strong> Khoanh khung <strong>viền đỏ 4px</strong> đúng vào phần tử mục tiêu để bạn xác nhận tức thì AI/Cache bấm có đúng nút hay không.</li>
+      <li><strong>Ảnh Sau (After) / Lỗi (Error):</strong> Ghi lại trạng thái giao diện sau tương tác cùng dữ liệu biến trích xuất (nếu có).</li>
+    </ul>
+
+    <h3>B. Bảng tra cứu Mã lỗi Tự động</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 24%;">Mã lỗi</th>
+          <th style="width: 38%;">Ý nghĩa kỹ thuật</th>
+          <th style="width: 38%;">Cách xử lý nhanh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code style="color: #dc2626; font-weight: bold;">ASSERTION_FAILED</code></td>
+          <td>Nội dung kỳ vọng ở bước Kiểm tra không xuất hiện trên trang.</td>
+          <td>Mở ảnh lỗi và xem lại chính xác câu chữ thực tế trên giao diện SUT.</td>
+        </tr>
+        <tr>
+          <td><code style="color: #dc2626; font-weight: bold;">ELEMENT_NOT_FOUND</code></td>
+          <td>Không tìm thấy nút/ô nhập khớp với mô tả trong kịch bản.</td>
+          <td>Kiểm tra ảnh bước trước xem nút đã tải xong hoặc đổi nhãn chữ chưa; nếu đổi web hãy xóa Cache bước đó.</td>
+        </tr>
+        <tr>
+          <td><code style="color: #d97706; font-weight: bold;">TIMEOUT</code></td>
+          <td>Quá thời gian chờ tải trang hoặc phản hồi từ máy chủ đích.</td>
+          <td>Kiểm tra hệ thống đích (ví dụ <code>http://127.0.0.1:5050</code>) đã được bật chưa.</td>
+        </tr>
+        <tr>
+          <td><code style="color: #9333ea; font-weight: bold;">EXECUTION_ERROR</code></td>
+          <td>Phát hiện lỗi HTTP/500 từ ứng dụng đích hoặc lỗi kết nối trình duyệt.</td>
+          <td>Đảm bảo URL bắt đầu bằng <code>http://</code> hoặc <code>https://</code> và máy chủ LLM đang trực tuyến.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>C. Xuất Báo cáo HTML Độc lập</h3>
+    <p>
+      Nhấn <strong>"Tải báo cáo HTML"</strong> ở tab Lịch sử để tải về 1 file <code>.html</code> duy nhất đã nhúng sẵn toàn bộ ảnh Base64, badges <code>⚡ Cache</code> / <code>Soft</code>, biến trích xuất và thời lượng từng bước — gửi qua Email/Zalo mở xem offline mọi nơi.
+    </p>
+  </div>
+
+  <div class="footer-note">
+    Tài liệu Hướng dẫn Sử dụng Chính thức • <strong>AutoTest Studio v9.0</strong> • Native Playwright + Micro-ReAct + Step Trace Cache
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -8,6 +8,23 @@
 *.tar.gz
 offline-package/
 
+# Sample & demo projects (per user instruction)
+sample01/
+sample_project/
+
+# Docker export leftovers & temporary metadata
+manifest.json
+repositories
+
+# Database & runtime files
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+be/data/
+data/
+
 # Dependencies
 node_modules/
 fe/node_modules/
@@ -21,10 +38,6 @@ dist-ssr/
 # Test execution outputs, screenshots and logs
 be/screenshots/
 be/manual_assets/
-be/data/
-data/runs/
-data/reports/
-data/history.json
 be/req.json
 logs/
 *.log
@@ -38,6 +51,16 @@ be/e2e_test_report.json
 be/test_results_*.json
 be/results_*.json
 
+# Local test keys & scripts
+be/tools/test_gemini_key.js
+
+# Non-runtime documentation, analysis notes & duplicate PDFs
+Huong-Dan-Su-Dung_bo_sung.pdf
+fe/public/Huong-Dan-Su-Dung.pdf
+TONG_HOP_VAN_DE_VA_KIEN_TRUC.txt
+phan_tich_01.txt
+docs/
+
 # OS & IDE
 .DS_Store
 Thumbs.db
@@ -48,4 +71,3 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
-

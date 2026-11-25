@@ -13,4 +13,7 @@ router.get("/model", configController.getModel);
 router.post("/model", configController.updateModel);
 router.put("/model", configController.updateModel);
 
+// Kiểm tra kết nối LLM trực tiếp
+router.post("/test-llm", configController.testLlm);
+
 export default router;

@@ -1,28 +1,44 @@
 import { historyService } from "../services/history.service.js";
+import { runnerLock } from "../utils/asyncLock.js";
 import { reportService } from "../services/report.service.js";
-import { logger } from "../utils/logger.js";
 
 export class HistoryController {
-  constructor(service = historyService, reporter = reportService) {
+  constructor(service = historyService, lock = runnerLock, reporter = reportService) {
     this.service = service;
+    this.lock = lock;
     this.reporter = reporter;
   }
 
   getAll = async (req, res, next) => {
     try {
-      const { projectId, featureId, status, search, limit } = req.query;
-      const runs = await this.service.getAll({
+      if (!this.lock.isBusy) {
+        await this.service.finalizeStaleRunningBatches({
+          isRunnerBusy: false,
+          staleGraceMs: 15000,
+        }).catch(() => {});
+      }
+
+      const { projectId, featureId, status, search, type, limit, offset } = req.query;
+      const parsedLimit = limit !== undefined && limit !== "" ? Number(limit) : 50;
+      const parsedOffset = offset !== undefined && offset !== "" ? Number(offset) : 0;
+
+      const result = await this.service.getPaginated({
         projectId: projectId ? String(projectId) : undefined,
         featureId: featureId ? String(featureId) : undefined,
         status: status ? String(status) : undefined,
         search: search ? String(search) : undefined,
-        limit: limit ? Math.min(Number(limit) || 100, 500) : 100,
+        type: type ? String(type) : "batches",
+        limit: Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50,
+        offset: Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0,
       });
 
       res.status(200).json({
         success: true,
-        total: runs.length,
-        runs,
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+        hasMore: result.hasMore,
+        runs: result.runs,
       });
     } catch (err) {
       next(err);
@@ -57,7 +73,7 @@ export class HistoryController {
         const saved = await this.service.saveMultipleRuns(body);
         return res.status(200).json({
           success: true,
-          savedCount: body.length,
+          savedCount: saved.length,
           runs: saved,
         });
       }
@@ -132,11 +148,12 @@ export class HistoryController {
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/đ/g, "d")
         .replace(/Đ/g, "D");
-      const safeName = asciiTitle
-        .replace(/[^\w\s-]/gi, "")
-        .trim()
-        .replace(/\s+/g, "_")
-        .toLowerCase() || "report";
+      const safeName =
+        asciiTitle
+          .replace(/[^\w\s-]/gi, "")
+          .trim()
+          .replace(/\s+/g, "_")
+          .toLowerCase() || "report";
       const filename = `report_${safeName}_${id}.html`;
 
       res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -149,4 +166,3 @@ export class HistoryController {
 }
 
 export const historyController = new HistoryController();
-

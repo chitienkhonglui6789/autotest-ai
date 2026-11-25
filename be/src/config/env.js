@@ -43,14 +43,27 @@ export const config = Object.freeze({
     get llmMs() {
       return parseNumber(process.env.LLM_TIMEOUT_MS, 300_000);
     },
-    gotoMs: 60_000,
+    get gotoMs() {
+      return parseNumber(process.env.GOTO_TIMEOUT_MS, 60_000);
+    },
+    get observeTimeoutMs() {
+      return parseNumber(process.env.OBSERVE_TIMEOUT_MS, 15_000);
+    },
+    get retryIntervalMs() {
+      return parseNumber(process.env.RETRY_INTERVAL_MS, 1_500);
+    },
+    get postActWaitMs() {
+      return parseNumber(process.env.POST_ACT_WAIT_MS, 1_200);
+    },
   }),
   limits: Object.freeze({
     get maxSteps() {
       return parseNumber(process.env.MAX_STEPS, 30);
     },
-    maxDescriptionLength: 4000,
-    bodyLimit: "1mb",
+    maxDescriptionLength: 10000,
+    get bodyLimit() {
+      return process.env.BODY_LIMIT || "10mb";
+    },
   }),
   llm: {
     get provider() {
@@ -65,13 +78,33 @@ export const config = Object.freeze({
     get apiKey() {
       return (process.env.LLM_API_KEY || "").trim();
     },
-  },
-  stagehand: Object.freeze({
-    get modelName() {
-      return (process.env.STAGEHAND_MODEL ?? "").trim();
+    get maxTokens() {
+      return parseNumber(process.env.LLM_MAX_TOKENS, 4096);
     },
-    get apiKey() {
-      return (process.env.STAGEHAND_API_KEY || process.env.LLM_API_KEY || "").trim();
+  },
+  screenshots: Object.freeze({
+    get format() {
+      const fmt = (process.env.SCREENSHOT_FORMAT || "jpeg").trim().toLowerCase();
+      return fmt === "png" ? "png" : "jpeg";
+    },
+    get quality() {
+      return parseNumber(process.env.SCREENSHOT_QUALITY, 80);
+    },
+    get fullPage() {
+      return parseBoolean(process.env.SCREENSHOT_FULL_PAGE, false);
+    },
+    get retentionDays() {
+      return parseNumber(process.env.SCREENSHOT_RETENTION_DAYS, 7);
+    },
+    get maxFolders() {
+      return parseNumber(process.env.SCREENSHOT_MAX_FOLDERS, 100);
+    },
+  }),
+  diagnostics: Object.freeze({
+    get strictness() {
+      const raw = (process.env.DIAGNOSTIC_STRICTNESS || "balanced").trim().toLowerCase();
+      if (raw === "explicit" || raw === "strict") return raw;
+      return "balanced";
     },
   }),
 });
@@ -80,10 +113,22 @@ export const config = Object.freeze({
  * Kiểm tra các biến môi trường bắt buộc trước khi xử lý nghiệp vụ
  */
 export const assertConfigReady = () => {
-  if (!config.llm.baseUrl || !config.llm.model) {
-    throw new ServiceUnavailableError("Thiếu LLM_BASE_URL hoặc LLM_MODEL trong .env");
+  const errors = [];
+  if (!config.llm.baseUrl) {
+    errors.push("Thiếu LLM_BASE_URL (ví dụ: http://127.0.0.1:11434/v1)");
+  } else {
+    try {
+      new URL(config.llm.baseUrl);
+    } catch {
+      errors.push(`LLM_BASE_URL không hợp lệ: "${config.llm.baseUrl}"`);
+    }
   }
-  if (config.stagehand.modelName && !config.stagehand.apiKey) {
-    throw new ServiceUnavailableError("STAGEHAND_MODEL đã được khai báo nhưng thiếu API key tương ứng");
+
+  if (!config.llm.model) {
+    errors.push("Thiếu LLM_MODEL (ví dụ: qwen2.5-coder, gpt-4o, gemini-flash)");
+  }
+
+  if (errors.length > 0) {
+    throw new ServiceUnavailableError(`Lỗi cấu hình hệ thống:\n- ${errors.join("\n- ")}`);
   }
 };

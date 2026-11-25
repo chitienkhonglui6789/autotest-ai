@@ -2,21 +2,32 @@ version: "2.2"
 
 services:
   autotest-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: autotest-studio:latest
     container_name: autotest-studio
     restart: unless-stopped
+    shm_size: "2gb"
+    mem_limit: 4096m
+    mem_reservation: 2048m
     ports:
-      - "${EXTERNAL_PORT:-39793}:3000"
-    environment:
-      - HOST=0.0.0.0
-      - PORT=3000
-      - HEADLESS=true
-      - CHROME_PATH=/usr/bin/chromium
+      # Ánh xạ cổng: Mặc định là 3000 (có thể tùy chỉnh PORT trong file .env)
+      - "${PORT:-3000}:3000"
     env_file:
+      # Tự động nạp toàn bộ cấu hình từ file .env ở thư mục gốc
       - .env
     volumes:
-      - ./data:/app/be/data
-      - ./screenshots:/app/be/screenshots
-      - ./.env:/app/be/.env
-    # shm_size 1GB giup Chromium headless render muot ma khong bi crash bo nho dem
-    shm_size: "1gb"
+      # Lưu trữ bền vững cơ sở dữ liệu SQLite (dự án, kịch bản, lịch sử chạy)
+      - ./be/data:/app/be/data
+      # Lưu trữ bền vững ảnh chụp màn hình từng bước kiểm thử
+      - ./be/screenshots:/app/be/screenshots
+    extra_hosts:
+      # Cho phép AutoTest trong Docker truy cập các trang web/API nội bộ đang chạy trên chính máy host
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

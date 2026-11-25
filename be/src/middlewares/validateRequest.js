@@ -3,6 +3,7 @@ import { config } from "../config/env.js";
 
 /**
  * Middleware kiểm tra tính hợp lệ của request body gửi lên POST /run
+ * Hỗ trợ truyền trực tiếp mảng `steps` hoặc chuỗi `description`
  */
 export const validateRunRequest = (req, res, next) => {
   const body = req.body;
@@ -11,22 +12,22 @@ export const validateRunRequest = (req, res, next) => {
     return next(new BadRequestError("Body phải là một đối tượng JSON"));
   }
 
-  const { description, variables, dryRun } = body;
+  const { description, steps, variables, dryRun } = body;
 
-  // Kiểm tra description
-  if (
-    typeof description !== "string" ||
-    !description.trim() ||
-    description.length > config.limits.maxDescriptionLength
-  ) {
+  const hasValidSteps = Array.isArray(steps) && steps.length > 0;
+  const hasValidDescription =
+    typeof description === "string" &&
+    description.trim().length > 0 &&
+    description.length <= config.limits.maxDescriptionLength;
+
+  if (!hasValidSteps && !hasValidDescription) {
     return next(
       new BadRequestError(
-        `description phải là chuỗi 1-${config.limits.maxDescriptionLength} ký tự`
+        `Cần cung cấp danh sách bước (steps) hoặc mô tả (description) từ 1-${config.limits.maxDescriptionLength} ký tự`
       )
     );
   }
 
-  // Kiểm tra variables
   if (variables !== undefined) {
     const isInvalidVariables =
       typeof variables !== "object" ||
@@ -39,11 +40,9 @@ export const validateRunRequest = (req, res, next) => {
     }
   }
 
-  // Kiểm tra dryRun (nếu có phải là boolean)
   if (dryRun !== undefined && typeof dryRun !== "boolean") {
     return next(new BadRequestError("dryRun phải là kiểu boolean"));
   }
 
   next();
 };
-

@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoTest-Core-v9 UI Trap Fixtures</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: #f6f8fb;
+        color: #1f2937;
+      }
+      .case-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+        background: #111827;
+        color: #fff;
+      }
+      .case-nav a {
+        color: #d1d5db;
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        background: #1f2937;
+      }
+      .case-nav a.active {
+        background: #2563eb;
+        color: #fff;
+      }
+      .container {
+        max-width: 960px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .trap-section {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+      .trap-section.hidden {
+        display: none;
+      }
+      h2 {
+        margin-top: 0;
+        font-size: 18px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #111827;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn-primary {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+      }
+      .btn-danger {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #fff;
+      }
+      .status-box {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        background: #f3f4f6;
+        font-size: 14px;
+      }
+
+      /* 1. multi-select-overlap */
+      .multi-select-wrapper {
+        position: relative;
+        width: 280px;
+      }
+      .dropdown-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        width: 280px;
+        background: #ffffff;
+        border: 1px solid #9ca3af;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.16);
+        padding: 10px;
+        z-index: 50;
+      }
+      .dropdown-menu.show {
+        display: block;
+      }
+      .dropdown-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 6px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .dropdown-option:hover {
+        background: #f3f4f6;
+      }
+      .overlap-continue-row {
+        margin-top: 16px;
+      }
+
+      /* 2. toast-variants */
+      .stale-banner {
+        padding: 12px 14px;
+        border-radius: 6px;
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+        margin-bottom: 16px;
+      }
+      .toast-stack {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 200;
+        max-width: 340px;
+      }
+      .toast {
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+        border: 1px solid transparent;
+      }
+      .toast-success {
+        background: #ecfdf5;
+        border-color: #6ee7b7;
+        color: #065f46;
+      }
+      .toast-info {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        color: #1e40af;
+      }
+      .toast-warning {
+        background: #fffbeb;
+        border-color: #fcd34d;
+        color: #92400e;
+      }
+      .toast-error {
+        background: #fef2f2;
+        border-color: #fca5a5;
+        color: #991b1b;
+      }
+      .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      /* 3. sticky-header-overlap */
+      .sticky-header {
+        position: sticky;
+        top: 0;
+        height: 90px;
+        background: #1e293b;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        font-weight: 600;
+        z-index: 100;
+        border-radius: 8px;
+      }
+      .tall-spacer {
+        height: 900px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        border: 1px dashed #d1d5db;
+        margin: 12px 0;
+      }
+
+      /* 4. overlay-and-modal */
+      .overlay-grid {
+        display: grid;
+        gap: 16px;
+      }
+      .trap-card {
+        position: relative;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 110px;
+        background: #f9fafb;
+      }
+      .cookie-banner {
+        position: absolute;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.94);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 8px;
+        z-index: 40;
+      }
+      .cookie-banner.hidden {
+        display: none;
+      }
+      .loading-mask {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.88);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #1d4ed8;
+        border-radius: 8px;
+        z-index: 45;
+      }
+      .loading-mask.hidden {
+        display: none;
+      }
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.65);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 300;
+      }
+      .modal-backdrop.open {
+        display: flex;
+      }
+      .modal-dialog {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        width: 380px;
+        max-width: calc(100vw - 32px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      }
+
+      /* 5. transient-animation-and-mask */
+      .slide-track {
+        position: relative;
+        height: 54px;
+        margin: 12px 0;
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 6px;
+      }
+      .sliding-btn {
+        position: relative;
+        transform: translateX(0px);
+        transition: transform 350ms linear;
+      }
+      .sliding-btn.moved {
+        transform: translateX(220px);
+      }
+      .field-group {
+        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-width: 320px;
+      }
+      .field-group input {
+        padding: 8px 10px;
+        border: 1px solid #9ca3af;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="case-nav" id="case-nav">
+      <a href="?case=all" data-nav="all">Tất cả</a>
+      <a href="?case=multi-select-overlap" data-nav="multi-select-overlap">multi-select-overlap</a>
+      <a href="?case=toast-variants" data-nav="toast-variants">toast-variants</a>
+      <a href="?case=sticky-header-overlap" data-nav="sticky-header-overlap">sticky-header-overlap</a>
+      <a href="?case=overlay-and-modal" data-nav="overlay-and-modal">overlay-and-modal</a>
+      <a href="?case=transient-animation-and-mask" data-nav="transient-animation-and-mask">transient-animation-and-mask</a>
+      <a href="?case=native-dialogs" data-nav="native-dialogs">native-dialogs</a>
+    </nav>
+
+    <div class="container">
+      <!-- CASE 1: multi-select-overlap -->
+      <section class="trap-section" data-case="multi-select-overlap" id="case-multi-select-overlap">
+        <h2>1. Multi-select Dropdown Overlap</h2>
+        <div class="multi-select-wrapper">
+          <button
+            id="multi-select-trigger"
+            type="button"
+            class="btn"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="multi-select-menu"
+          >
+            Chọn danh mục (0)
+          </button>
+          <div id="multi-select-menu" role="listbox" aria-multiselectable="true" class="dropdown-menu">
+            <label class="dropdown-option">
+              <input type="checkbox" class="ms-checkbox" value="Option A" id="ms-opt-a" />
+              <span>Lựa chọn A</span>
+            </label>
+            <label class="dropdown-option">
+              <input type="checkbox" class="ms-checkbox" value="Option B" id="ms-opt-b" />
+              <span>Lựa chọn B</span>
+            </label>
+            <label class="dropdown-option">
+              <input type="checkbox" class="ms-checkbox" value="Option C" id="ms-opt-c" />
+              <span>Lựa chọn C</span>
+            </label>
+          </div>
+        </div>
+        <div class="overlap-continue-row">
+          <button id="btn-continue" type="button" class="btn btn-primary">Tiếp tục</button>
+        </div>
+        <div id="multi-select-result" class="status-box">Chưa tiếp tục</div>
+      </section>
+
+      <!-- CASE 2: toast-variants -->
+      <section class="trap-section" data-case="toast-variants" id="case-toast-variants">
+        <h2>2. Toast Variants & Stale Alert</h2>
+        <div id="stale-error-banner" role="alert" class="stale-banner">
+          Cảnh báo cũ: Phiên trước chưa đồng bộ xong
+        </div>
+        <div class="btn-row">
+          <button id="btn-toast-success" type="button" class="btn">Toast Thành công</button>
+          <button id="btn-toast-info" type="button" class="btn">Toast Info</button>
+          <button id="btn-toast-warning" type="button" class="btn">Toast Warning</button>
+          <button id="btn-toast-error-422" type="button" class="btn btn-danger">API 422 Error Toast</button>
+        </div>
+        <div id="toast-stack" class="toast-stack"></div>
+      </section>
+
+      <!-- CASE 3: sticky-header-overlap -->
+      <section class="trap-section" data-case="sticky-header-overlap" id="case-sticky-header-overlap">
+        <header id="sticky-header" class="sticky-header">Sticky Header (90px)</header>
+        <div class="tall-spacer">Vùng đệm phía trên (900px)</div>
+        <div>
+          <button id="btn-sticky-target" type="button" class="btn btn-primary">Nút cuối trang</button>
+          <span id="sticky-result" class="status-box" style="display: inline-block; margin-left: 12px">Chưa bấm</span>
+        </div>
+        <div class="tall-spacer">Vùng đệm phía dưới (900px)</div>
+      </section>
+
+      <!-- CASE 4: overlay-and-modal -->
+      <section class="trap-section" data-case="overlay-and-modal" id="case-overlay-and-modal">
+        <h2>4. Overlay, Cookie Banner, Loading Mask & Modal</h2>
+        <div class="overlay-grid">
+          <div class="trap-card" id="cookie-trap">
+            <button id="btn-cookie-target" type="button" class="btn btn-primary">Lưu sau Cookie</button>
+            <span id="cookie-target-result" style="margin-left: 10px">Chưa bấm</span>
+            <div id="cookie-banner" class="cookie-banner" role="region" aria-label="Cookie consent">
+              <span>Trang web sử dụng cookie để cải thiện trải nghiệm.</span>
+              <div class="btn-row">
+                <button id="btn-cookie-reject" type="button" class="btn">Từ chối</button>
+                <button id="btn-cookie-close" type="button" class="btn">Đóng</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="trap-card" id="loading-trap">
+            <div class="btn-row" style="margin-bottom: 10px">
+              <button id="btn-trigger-loading" type="button" class="btn">Hiện Loading 500ms</button>
+              <button id="btn-loading-target" type="button" class="btn btn-primary">Xác nhận sau Loading</button>
+              <span id="loading-target-result">Chưa bấm</span>
+            </div>
+            <div id="loading-mask" class="loading-mask" aria-busy="true">Đang xử lý...</div>
+          </div>
+
+          <div class="trap-card" id="modal-trap">
+            <div class="btn-row">
+              <button id="btn-open-modal" type="button" class="btn">Mở Modal Nghiệp Vụ</button>
+              <button id="btn-modal-target" type="button" class="btn btn-primary">Hành động sau Modal</button>
+              <span id="modal-target-result">Chưa bấm</span>
+            </div>
+          </div>
+        </div>
+        <div id="business-modal-backdrop" class="modal-backdrop">
+          <div id="business-modal" role="dialog" aria-modal="true" aria-labelledby="business-modal-title" class="modal-dialog">
+            <h3 id="business-modal-title" style="margin-top: 0">Xác nhận nghiệp vụ</h3>
+            <p>Vui lòng xác nhận để tiếp tục thao tác.</p>
+            <div class="btn-row">
+              <button id="btn-modal-confirm" type="button" class="btn btn-primary">Xác nhận</button>
+              <button id="btn-modal-cancel" type="button" class="btn">Đóng</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CASE 5: transient-animation-and-mask -->
+      <section class="trap-section" data-case="transient-animation-and-mask" id="case-transient-animation-and-mask">
+        <h2>5. Transient Animation, Input Mask & Optimistic Rollback</h2>
+        <button id="btn-start-slide" type="button" class="btn">Bắt đầu trượt (350ms)</button>
+        <div class="slide-track">
+          <button id="btn-sliding-target" type="button" class="btn btn-primary sliding-btn">Nút trượt</button>
+        </div>
+        <div id="sliding-result" class="status-box">Chưa bấm nút trượt</div>
+
+        <div class="field-group">
+          <label for="masked-phone-input">Số điện thoại (chỉ giữ số & tự định dạng):</label>
+          <input id="masked-phone-input" type="text" placeholder="090-123-4567" />
+        </div>
+
+        <div class="field-group">
+          <label for="strict-typing-input">Ô chỉ nhận gõ phím thật (bỏ qua fill trực tiếp):</label>
+          <input id="strict-typing-input" type="text" placeholder="Chỉ nhận keyboard events" />
+        </div>
+
+        <div style="margin-top: 16px">
+          <button id="btn-optimistic-save" type="button" class="btn btn-primary">Lưu Optimistic</button>
+          <div id="optimistic-status" class="status-box">Trạng thái: Chưa lưu</div>
+        </div>
+      </section>
+
+      <!-- CASE 6: native-dialogs -->
+      <section class="trap-section" data-case="native-dialogs" id="case-native-dialogs">
+        <h2>6. Native Dialogs (alert, confirm, beforeunload)</h2>
+        <div class="btn-row">
+          <button id="btn-alert" type="button" class="btn">Trigger Alert</button>
+          <button id="btn-confirm" type="button" class="btn btn-danger">Xóa vĩnh viễn</button>
+          <button id="btn-enable-beforeunload" type="button" class="btn">Bật beforeunload</button>
+          <a id="link-leave-page" href="/login" class="btn">Rời trang (/login)</a>
+        </div>
+        <div id="dialog-result" class="status-box">Chưa kích hoạt dialog</div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const activeCase = params.get("case") || "all";
+        const overlayMode = params.get("overlay") || "";
+        const noEscape = params.get("noEscape") === "1";
+
+        document.querySelectorAll("[data-nav]").forEach((link) => {
+          if (link.getAttribute("data-nav") === activeCase) {
+            link.classList.add("active");
+          }
+        });
+
+        const sections = document.querySelectorAll(".trap-section");
+        if (activeCase !== "all") {
+          document.getElementById("case-nav").style.display = "none";
+          sections.forEach((sec) => {
+            if (sec.getAttribute("data-case") !== activeCase) {
+              sec.classList.add("hidden");
+            }
+          });
+        }
+
+        // 1. multi-select-overlap
+        const msTrigger = document.getElementById("multi-select-trigger");
+        const msMenu = document.getElementById("multi-select-menu");
+        const msResult = document.getElementById("multi-select-result");
+        const msCheckboxes = Array.from(document.querySelectorAll(".ms-checkbox"));
+
+        function setDropdownOpen(open) {
+          msMenu.classList.toggle("show", open);
+          msTrigger.setAttribute("aria-expanded", open ? "true" : "false");
+        }
+
+        function updateTriggerLabel() {
+          const selected = msCheckboxes.filter((cb) => cb.checked).map((cb) => cb.value);
+          msTrigger.textContent = `Chọn danh mục (${selected.length})`;
+        }
+
+        msTrigger.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const currentlyOpen = msMenu.classList.contains("show");
+          setDropdownOpen(!currentlyOpen);
+        });
+
+        msMenu.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
+
+        msCheckboxes.forEach((cb) => {
+          cb.addEventListener("change", () => {
+            updateTriggerLabel();
+          });
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !noEscape && msMenu.classList.contains("show")) {
+            setDropdownOpen(false);
+          }
+        });
+
+        document.addEventListener("click", (e) => {
+          if (
+            msMenu.classList.contains("show") &&
+            !msMenu.contains(e.target) &&
+            !msTrigger.contains(e.target)
+          ) {
+            setDropdownOpen(false);
+          }
+        });
+
+        document.getElementById("btn-continue").addEventListener("click", () => {
+          const selected = msCheckboxes.filter((cb) => cb.checked).map((cb) => cb.value);
+          msResult.textContent = `Đã tiếp tục với: ${selected.join(", ") || "Không có"}`;
+        });
+
+        // 2. toast-variants
+        const toastStack = document.getElementById("toast-stack");
+        function pushToast({ role, cls, text }) {
+          const el = document.createElement("div");
+          el.setAttribute("role", role);
+          el.className = `toast ${cls}`;
+          el.textContent = text;
+          toastStack.appendChild(el);
+          return el;
+        }
+
+        document.getElementById("btn-toast-success").addEventListener("click", () => {
+          pushToast({
+            role: "alert",
+            cls: "toast-success",
+            text: "Đã lưu thành công, không có lỗi nào",
+          });
+        });
+
+        document.getElementById("btn-toast-info").addEventListener("click", () => {
+          pushToast({
+            role: "status",
+            cls: "toast-info",
+            text: "Đang xử lý yêu cầu",
+          });
+        });
+
+        document.getElementById("btn-toast-warning").addEventListener("click", () => {
+          pushToast({
+            role: "status",
+            cls: "toast-warning",
+            text: "Cảnh báo nhẹ: Dữ liệu chưa được tối ưu",
+          });
+        });
+
+        document.getElementById("btn-toast-error-422").addEventListener("click", async () => {
+          const res = await fetch("/api/save-422", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ test: true }),
+          });
+          const data = await res.json();
+          if (!res.ok || data.ok === false) {
+            pushToast({
+              role: "alert",
+              cls: "toast-error",
+              text: `Lỗi ${res.status}: ${data.error || "Thất bại"}`,
+            });
+          }
+        });
+
+        // 3. sticky-header-overlap
+        document.getElementById("btn-sticky-target").addEventListener("click", () => {
+          document.getElementById("sticky-result").textContent = "Đã bấm nút cuối trang";
+        });
+
+        // 4. overlay-and-modal
+        const cookieBanner = document.getElementById("cookie-banner");
+        const loadingMask = document.getElementById("loading-mask");
+        const modalBackdrop = document.getElementById("business-modal-backdrop");
+
+        function hideCookieBanner() {
+          cookieBanner.classList.add("hidden");
+        }
+        document.getElementById("btn-cookie-reject").addEventListener("click", hideCookieBanner);
+        document.getElementById("btn-cookie-close").addEventListener("click", hideCookieBanner);
+        document.getElementById("btn-cookie-target").addEventListener("click", () => {
+          document.getElementById("cookie-target-result").textContent = "Đã lưu sau Cookie";
+        });
+
+        function showLoadingFor500ms() {
+          loadingMask.classList.remove("hidden");
+          loadingMask.setAttribute("aria-busy", "true");
+          setTimeout(() => {
+            loadingMask.classList.add("hidden");
+            loadingMask.setAttribute("aria-busy", "false");
+          }, 500);
+        }
+
+        if (activeCase === "overlay-and-modal" || activeCase === "all") {
+          showLoadingFor500ms();
+        }
+        document.getElementById("btn-trigger-loading").addEventListener("click", showLoadingFor500ms);
+        document.getElementById("btn-loading-target").addEventListener("click", () => {
+          document.getElementById("loading-target-result").textContent = "Đã xác nhận sau Loading";
+        });
+
+        function setModalOpen(open) {
+          modalBackdrop.classList.toggle("open", open);
+        }
+        if (overlayMode === "modal") {
+          setModalOpen(true);
+        }
+        document.getElementById("btn-open-modal").addEventListener("click", () => setModalOpen(true));
+        document.getElementById("btn-modal-confirm").addEventListener("click", () => {
+          setModalOpen(false);
+          document.getElementById("modal-target-result").textContent = "Đã xác nhận modal";
+        });
+        document.getElementById("btn-modal-cancel").addEventListener("click", () => setModalOpen(false));
+        document.getElementById("btn-modal-target").addEventListener("click", () => {
+          document.getElementById("modal-target-result").textContent = "Đã chạy hành động sau Modal";
+        });
+
+        // 5. transient-animation-and-mask
+        const slidingBtn = document.getElementById("btn-sliding-target");
+        document.getElementById("btn-start-slide").addEventListener("click", () => {
+          slidingBtn.classList.toggle("moved");
+        });
+        slidingBtn.addEventListener("click", () => {
+          document.getElementById("sliding-result").textContent = "Đã bấm nút trượt";
+        });
+        if (params.get("animateOnLoad") === "1") {
+          requestAnimationFrame(() => slidingBtn.classList.add("moved"));
+        }
+
+        const phoneInput = document.getElementById("masked-phone-input");
+        phoneInput.addEventListener("input", () => {
+          const digits = phoneInput.value.replace(/\D/g, "").slice(0, 10);
+          let formatted = digits;
+          if (digits.length > 6) {
+            formatted = `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+          } else if (digits.length > 3) {
+            formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
+          }
+          phoneInput.value = formatted;
+        });
+
+        const strictTypingInput = document.getElementById("strict-typing-input");
+        let lastTypedValue = "";
+        strictTypingInput.addEventListener("keydown", () => {
+          strictTypingInput.dataset.fromKey = "1";
+        });
+        strictTypingInput.addEventListener("input", () => {
+          if (strictTypingInput.dataset.fromKey === "1") {
+            lastTypedValue = strictTypingInput.value;
+            delete strictTypingInput.dataset.fromKey;
+          } else {
+            // Mô phỏng ô bị framework reset khi set value bằng .fill() không qua keydown
+            strictTypingInput.value = lastTypedValue;
+          }
+        });
+
+        const optimisticStatus = document.getElementById("optimistic-status");
+        document.getElementById("btn-optimistic-save").addEventListener("click", async () => {
+          optimisticStatus.textContent = "Trạng thái: Đã lưu (Optimistic)";
+          try {
+            const res = await fetch("/api/optimistic-rollback", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ save: true }),
+            });
+            const data = await res.json();
+            if (!res.ok || data.ok === false) {
+              optimisticStatus.textContent = `Trạng thái: Chưa lưu (Đã hoàn tác: ${data.error})`;
+            }
+          } catch {
+            optimisticStatus.textContent = "Trạng thái: Chưa lưu (Đã hoàn tác do lỗi mạng)";
+          }
+        });
+
+        // 6. native-dialogs
+        const dialogResult = document.getElementById("dialog-result");
+        document.getElementById("btn-alert").addEventListener("click", () => {
+          window.alert("Thông báo hệ thống!");
+          dialogResult.textContent = "alert_closed";
+        });
+        document.getElementById("btn-confirm").addEventListener("click", () => {
+          const accepted = window.confirm("Bạn có chắc muốn xóa vĩnh viễn?");
+          dialogResult.textContent = accepted ? "confirm_accepted" : "confirm_dismissed";
+        });
+        document.getElementById("btn-enable-beforeunload").addEventListener("click", () => {
+          window.onbeforeunload = (e) => {
+            e.preventDefault();
+            e.returnValue = "";
+            return "";
+          };
+          dialogResult.textContent = "beforeunload_enabled";
+        });
+      })();
+    </script>
+  </body>
+</html>

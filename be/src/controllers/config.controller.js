@@ -5,6 +5,8 @@ import {
   updateEnvVars,
   getEnvPath,
 } from "../services/config.service.js";
+import { llmService } from "../services/llm.service.js";
+import { config } from "../config/env.js";
 
 export class ConfigController {
   /**
@@ -90,6 +92,56 @@ export class ConfigController {
       });
     } catch (err) {
       next(err);
+    }
+  };
+
+  /**
+   * POST /config/test-llm - Kiểm tra kết nối thực tế tới Local/Cloud LLM hiện hành (hoặc cấu hình thử)
+   */
+  testLlm = async (req, res) => {
+    const startedAt = Date.now();
+    const overrideBaseUrl = req.body?.baseUrl ? String(req.body.baseUrl).trim() : config.llm.baseUrl;
+    const overrideModel = req.body?.model ? String(req.body.model).trim() : config.llm.model;
+    const overrideApiKey = req.body?.apiKey !== undefined ? String(req.body.apiKey).trim() : config.llm.apiKey;
+
+    try {
+      const testClient = new llmService.constructor({
+        ...config,
+        llm: {
+          ...config.llm,
+          baseUrl: overrideBaseUrl.replace(/\/+$/, ""),
+          model: overrideModel,
+          apiKey: overrideApiKey,
+        },
+        timeouts: {
+          ...config.timeouts,
+          llmMs: 15000,
+        },
+      });
+
+      const reply = await testClient.chatCompletion(
+        [{ role: "user", content: "Trả lời duy nhất 1 từ: OK" }],
+        AbortSignal.timeout(15000)
+      );
+
+      const latencyMs = Date.now() - startedAt;
+      res.status(200).json({
+        success: true,
+        latencyMs,
+        model: overrideModel,
+        baseUrl: overrideBaseUrl,
+        reply: String(reply || "").slice(0, 60),
+        message: `Kết nối AI thành công (${latencyMs}ms)!`,
+      });
+    } catch (err) {
+      const latencyMs = Date.now() - startedAt;
+      res.status(200).json({
+        success: false,
+        latencyMs,
+        model: overrideModel,
+        baseUrl: overrideBaseUrl,
+        message: `Kết nối thất bại: ${err.message}`,
+      });
     }
   };
 }
